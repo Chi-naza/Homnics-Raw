@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
+import 'package:homnics/authentication/controller/authentication_controller.dart';
 import 'package:homnics/features/HealthPlans/controllers/UserPlanController.dart';
 import 'package:homnics/features/appointment/models/appointment.dart';
 import 'package:homnics/features/services/helper_functions.dart';
@@ -15,13 +16,14 @@ import '../models/meeting.dart';
 class AppointmentController extends BaseAPI {
   // plan controller
   var userPlanController = Get.find<UsersPlanController>();
+  var authenticationController = Get.find<AuthenticationController>();
 
   bookAppointment(Appointment appointment, BuildContext context) async {
     var url = baseUrl + postAppointmentURL;
     var params = json.encode(appointment.toJson());
     print(params);
-    var response =
-        await post(Uri.parse(url), headers: await myHeaders(), body: params);
+    var response = await post(Uri.parse(url),
+        headers: await authenticationController.userHeader(), body: params);
     print("========${response.body}");
     print(":::::${response.statusCode}");
 
@@ -36,16 +38,18 @@ class AppointmentController extends BaseAPI {
     String beneficiaryId = await userPlanController.getPlanBeneficiarId();
     var url =
         'https://api.homnics.com/user-api/appointment/by-status/beneficiary/$beneficiaryId?status=$status&pageNumber=1&pageSize=1000';
+
     // baseUrl + getAppointmentByBeneficiaryStatus(beneficiaryId, status);
     try {
-      var response = await get(Uri.parse(url), headers: await myHeaders());
+      var response = await get(Uri.parse(url),
+          headers: await authenticationController.userHeader());
       //print(response.statusCode);
 
+      print(response.statusCode);
       var result = json.decode(response.body);
 
-      if (response.statusCode < 400) {
-        // print("loading");
-        // print(result);
+      if (response.statusCode == 200) {
+        print(result['appointments']);
         return result['appointments'];
         //return Appointment.appointmentsFromJson(result['appointments']);
       }
@@ -58,8 +62,8 @@ class AppointmentController extends BaseAPI {
   fixMeeting(String appointmentId) async {
     var url = baseUrl + fixMeetingUrl;
     var params = json.encode({"appointmentId": appointmentId});
-    var response =
-        await post(Uri.parse(url), headers: await myHeaders(), body: params);
+    var response = await post(Uri.parse(url),
+        headers: await authenticationController.userHeader(), body: params);
     var result = json.decode(response.body);
     if (response.statusCode < 400) {
       print(result);
@@ -114,20 +118,45 @@ class AppointmentController extends BaseAPI {
     return [];
   }
 
-  geAvailableProfessionals(BuildContext context, String date) async {
+  Future<List<Professional>> geAvailableProfessionals(
+      BuildContext context, String date) async {
     String url = baseUrl +
         getAvailableProfessionals +
         'pageNumber=1&pageSize=10&appointmentDate=$date';
-    try {
-      var response = await get(Uri.parse(url), headers: await myHeaders());
-      var result = json.decode(response.body);
-      if (response.statusCode < 400) {
-        List<Professional> professionals =
-            await Professional.professionalsFromJson(result['professionals']);
-        print("The length of professionals is : ${professionals.length}");
 
-        return professionals;
+    try {
+      final response = await get(Uri.parse(url),
+          headers: await authenticationController.userHeader());
+
+      if (response.statusCode == 200) {
+        final result = json.decode(response.body);
+        if (result.containsKey('professionals')) {
+          final List<Map<String, dynamic>> professionalDataList =
+              List<Map<String, dynamic>>.from(result['professionals']);
+          List<Professional> professionals = professionalDataList
+              .map((data) => Professional.fromJson(data))
+              .toList();
+
+          if (professionals.isNotEmpty) {
+            print("The length of professionals is : ${professionals.length}");
+            print(
+                "The name of the first professional is : ${professionals.first.name}");
+          } else {
+            print("No professionals found in the result.");
+          }
+
+          return professionals;
+        } else {
+          print("No 'professionals' key found in the API response.");
+          return [];
+        }
+      } else {
+        print("Request failed with status code: ${response.statusCode}");
+        return [];
       }
-    } catch (error) {}
+    } catch (error) {
+      print("An error occurred while fetching professionals: $error");
+      return [];
+    }
   }
 }

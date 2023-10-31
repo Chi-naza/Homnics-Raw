@@ -4,6 +4,7 @@ import 'package:homnics/features/appointment/controllers/appointmentController.d
 import 'package:homnics/features/auth/screens/account_success_screen.dart';
 import 'package:homnics/features/home/screen/navigation_screen.dart';
 import 'package:homnics/features/professionals/models/professionals.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../appointment/widgets/ecg_loader.dart';
 import '../../appointment/widgets/professional_widget.dart';
@@ -22,6 +23,7 @@ class AvailableProfessionalScreen extends StatefulWidget {
 class _AvailableProfessionalScreenState
     extends State<AvailableProfessionalScreen> {
   List<Professional> professionals = [];
+  Professional? professional;
   String planBeneficiaryId = '';
   String networkImage =
       'https://ahegel-dump.s3.amazonaws.com/homnics-avatar/default_user.png';
@@ -30,17 +32,20 @@ class _AvailableProfessionalScreenState
   initState() {
     _getProfessionals();
     super.initState();
+    // getProfessional();
   }
 
   @override
   Widget build(BuildContext context) {
+    // AppointmentController().geAvailableProfessionalsCall(widget.date);
+    print("PROFESSIONAL WITH THIER DETAILS : ${professional?.email}");
+    // print("PROFESSIONALS : : ${professionals.first}");
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
         backgroundColor: appBarColor,
         automaticallyImplyLeading: false,
         centerTitle: true,
-       
         title: Align(
           alignment: Alignment.center,
           child: Text(
@@ -95,7 +100,7 @@ class _AvailableProfessionalScreenState
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(8.0),
                               ),
-                              hintText: 'Search',
+                              hintText: 'Fins Professionals',
                               hintStyle: TextStyle(
                                 color: Colors.grey,
                                 //fontSize: 16,
@@ -109,7 +114,7 @@ class _AvailableProfessionalScreenState
                       ),
                       GestureDetector(
                         onTap: () {
-                         _getProfessionals();
+                          _getProfessionals();
                         },
                         child: Container(
                             margin: EdgeInsets.only(left: 15),
@@ -128,7 +133,7 @@ class _AvailableProfessionalScreenState
                 Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Text(
-                    'List of Professionals',
+                    'Verified Professionals',
                     textAlign: TextAlign.center,
                   ),
                 ),
@@ -183,7 +188,6 @@ class _AvailableProfessionalScreenState
                           child: EcgLoadingWidget(),
                         );
                       }
-                      ;
                     }),
               ],
             ),
@@ -194,18 +198,10 @@ class _AvailableProfessionalScreenState
   }
 
   Future<List<Professional>> _getProfessionals() async {
+    print(widget.date);
     List<Professional> professionals = await AppointmentController()
         .geAvailableProfessionals(context, widget.date);
 
     return professionals;
   }
-
-  // deleteThisFunction() {
-  //   Navigator.of(context)
-  //       .push(MaterialPageRoute(builder: (_) => AccountSuccessScreen()));
-  // }
-
-  // void getData() {
-  //   // planBeneficiaryId = await UserPlanController().getPlanBeneficiarId(context);
-  // }
 }

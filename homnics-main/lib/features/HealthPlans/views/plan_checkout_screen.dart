@@ -439,7 +439,8 @@ class _PlanCheckOutScreenState extends State<PlanCheckOutScreen> {
                     onPressed: () async {
                       var (userId, email, password, token) =
                           await authenticationController.fetchUserData();
-                      print("EMAIL : $email");
+                      var user = authenticationController.userInfo;
+                      print("EMAIL : ${user.value.email}");
                       print("Plan: ${widget.healthPlan.id}");
                       // PaymentAPIService().getPaymentReference(
                       //     email: email, healthPlanId: widget.healthPlan.id!);
@@ -447,7 +448,7 @@ class _PlanCheckOutScreenState extends State<PlanCheckOutScreen> {
                         plan: widget.healthPlan,
                         title: widget.healthPlan.name!,
                         amount: widget.healthPlan.price!,
-                        email: email, //(AuthAPI().userInfo).email,
+                        email: user.value.email, //(AuthAPI().userInfo).email,
                         context: context,
                       );
                     },

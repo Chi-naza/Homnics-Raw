@@ -7,16 +7,19 @@ import 'package:homnics/features/prescription/controllers/prescription_response.
 import 'package:homnics/services/base_api.dart';
 import 'package:http/http.dart';
 
+import '../../../authentication/controller/authentication_controller.dart';
 import '../../../services/constants.dart';
 
 class PrescriptionController extends BaseAPI {
   var userPlanController = Get.find<UsersPlanController>();
+  var authenticationController = Get.find<AuthenticationController>();
 
   getPrescriptionById(BuildContext context) async {
     String beneficiaryId = await userPlanController.getPlanBeneficiarId();
     var url = baseUrl + getPrescriptionsById(beneficiaryId);
     try {
-      var response = await get(Uri.parse(url), headers: await myHeaders());
+      var response = await get(Uri.parse(url),
+          headers: await authenticationController.userHeader());
       print(response.statusCode);
       var result = json.decode(response.body);
 
@@ -38,8 +41,8 @@ class PrescriptionController extends BaseAPI {
       String beneficiaryId = await userPlanController.getPlanBeneficiarId();
       final url = baseUrl + getPrescriptionsById(beneficiaryId);
 
-      final response =
-          await get(Uri.parse(url), headers: await BaseAPI().myHeaders());
+      final response = await get(Uri.parse(url),
+          headers: await authenticationController.userHeader());
 
       if (response.statusCode == 200) {
         // Successful response

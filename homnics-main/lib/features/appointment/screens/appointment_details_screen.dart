@@ -15,7 +15,7 @@ import '../../professionals/widgets/professional_head.dart';
 import '../models/symptoms.dart';
 
 class AppointmentDetailsScreen extends StatefulWidget {
-  final Professional professional;
+  Professional professional;
 
   AppointmentDetailsScreen({required this.professional, super.key});
 
@@ -25,10 +25,6 @@ class AppointmentDetailsScreen extends StatefulWidget {
 }
 
 class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
-  // plan controller
-  var userPlanController = Get.find<UsersPlanController>();
-
-  // text controllers
   TextEditingController dateinput = TextEditingController();
   TextEditingController timeinput = TextEditingController();
   BookingsCalender bookingsCalender = BookingsCalender();
@@ -40,8 +36,11 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
   List<Symptom> selectedSymptoms = [];
   String my_symptoms = '';
   String selectedDate = '';
+  String formatedTime = '';
   String remindAt = '';
   int? selectedFormat = 1;
+
+  final currentPlanId = "".obs;
   var apppointmentFormat = [
     {
       "Id": 2,
@@ -66,7 +65,31 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    print("PLAN ID : $currentPlanId");
+    print(dateinput.text);
+    print(UsersPlanController().getPlanBeneficiarId());
     return Scaffold(
+        floatingActionButton: Container(
+          margin: EdgeInsets.only(left: 35),
+          width: double.infinity,
+          child: ElevatedButton(
+              style: ElevatedButton.styleFrom(backgroundColor: primaryColor),
+              onPressed: () {
+                processData();
+              },
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(
+                  'Book',
+                  style: TextStyle(
+                    color: appBarColor,
+                    fontWeight: FontWeight.w400,
+                    fontSize: 20,
+                    fontFamily: 'RedHatDisplay',
+                  ),
+                ),
+              )),
+        ),
         appBar: AppBar(
           elevation: 0,
           // backgroundColor: appBarColor,
@@ -155,7 +178,7 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
                               ),
                               borderRadius: BorderRadius.circular(4.0),
                               color: _container1Color),
-                          child: Text(dateinput.text)),
+                          child: Text(timeinput.text)),
                     ),
                     SizedBox(
                       width: 12.0,
@@ -178,7 +201,7 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
                               ),
                               borderRadius: BorderRadius.circular(4.0),
                               color: _container2Color),
-                          child: Text(timeinput.text)),
+                          child: Text(formatedTime)),
                     ),
                     SizedBox(
                       width: 0.0,
@@ -559,29 +582,6 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
                   SizedBox(
                     height: 12,
                   ),
-                  Center(
-                    child: Container(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                              backgroundColor: primaryColor),
-                          onPressed: () {
-                            processData();
-                          },
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Text(
-                              'Book',
-                              style: TextStyle(
-                                color: appBarColor,
-                                fontWeight: FontWeight.w400,
-                                fontSize: 20,
-                                fontFamily: 'RedHatDisplay',
-                              ),
-                            ),
-                          )),
-                    ),
-                  )
                 ],
               ),
             ),
@@ -608,14 +608,22 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
   }
 
   Future<void> processData() async {
-    DateTime parsedTime = DateFormat('hh:mm a').parse(timeinput.text);
-    String formattedTime = DateFormat('HH:mm').format(parsedTime);
+    String beneficiaryId;
+    try {
+      beneficiaryId = await UsersPlanController().getPlanBeneficiarId();
+    } catch (error) {
+      // Handle the error, e.g., show an error message
+      print("Error while fetching beneficiary ID: $error");
+      return;
+    }
+    // DateTime parsedTime = DateFormat('hh:mm a').parse(timeinput.text);
+    // String formattedTime = DateFormat('HH:mm').format(parsedTime);
     final body = {
-      "planBeneficiaryId": await userPlanController.getPlanBeneficiarId(),
+      "planBeneficiaryId": beneficiaryId,
       "professionalId": widget.professional.id,
       "appointmentStatus": 1,
       "appointmentFormat": selectedFormat,
-      "appointmentDate": dateinput.text + ' ' + formattedTime,
+      "appointmentDate": dateinput.text,
       "cancellationReason": "",
       "symptoms": my_symptoms,
       "additionalInfo": additionalInfoController.text,
@@ -634,6 +642,8 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
                 builder: (context) => BookingSummary(
                       professional: widget.professional,
                       appointment: appointment,
+                      dateInput: timeinput.text,
+                      timeInput: formatedTime,
                     )));
       }
     } else {
@@ -652,6 +662,11 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
     SharedPreferences _pref = await SharedPreferences.getInstance();
     dateinput.text = _pref.getString("new_appointment_date") ?? '';
     timeinput.text = _pref.getString("new_appointment_Time") ?? '';
+    // planId = _pref.getString("health_plan_id") ?? '';
+
+    currentPlanId.value = (await _pref.getString("health_plan_id"))!;
+    print("CURRENT PLAN : $currentPlanId");
+    formatedTime = _pref.getString("new_appointment_formatted_time") ?? '';
 
     symptoms = Symptom.symptoms;
     setState(() {});

@@ -6,6 +6,7 @@ import 'package:homnics/common/utils/colors.dart';
 import 'package:homnics/features/prescription/controllers/prescription_controller.dart';
 import 'package:homnics/services/constants.dart';
 import 'package:http/http.dart';
+import '../../../authentication/controller/authentication_controller.dart';
 import '../../../services/base_api.dart';
 import '../../HealthPlans/controllers/UserPlanController.dart';
 import '../../appointment/widgets/appointment_list_filter.dart';
@@ -41,13 +42,14 @@ class _ActivityScreenState extends State<ActivityScreen> {
   }
 
   var userPlanController = Get.find<UsersPlanController>();
+  var authenticationController = Get.find<AuthenticationController>();
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     print("fetch prescriptions");
-    PrescriptionController().fetchPrescriptions(context);
+    //PrescriptionController().fetchPrescriptions(context);
   }
 
   Widget getAppointmentsWidget() {
@@ -124,7 +126,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
 
   @override
   Widget build(BuildContext context) {
-    fetchPrescriptions();
+    //fetchPrescriptions();
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
@@ -324,7 +326,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
   }
 
   _buildAppointmentBodySwitch() {
-    if (tabID == 0) {
+    if (tabID == 1) {
       return Column(
         children: [
           Container(
@@ -486,14 +488,14 @@ class _ActivityScreenState extends State<ActivityScreen> {
       String beneficiaryId = await userPlanController.getPlanBeneficiarId();
       final url = baseUrl + getPrescriptionsById(beneficiaryId);
 
-      final response =
-          await get(Uri.parse(url), headers: await BaseAPI().myHeaders());
+      final response = await get(Uri.parse(url),
+          headers: await authenticationController.userHeader());
       print(url);
       print(response);
       print("beneficiaryId : ${beneficiaryId}");
       if (response.statusCode == 200) {
-        final responsePrescription = jsonDecode(response.body) as Map;
-        final result = responsePrescription['medications'] as List;
+        final responsePrescription = jsonDecode(response.body);
+        final result = responsePrescription['medications'];
         setState(() {
           latestPrescription = result;
         });
@@ -503,12 +505,12 @@ class _ActivityScreenState extends State<ActivityScreen> {
         // Display a user-friendly message to indicate no prescriptions found.
       } else {
         // Handle other error status codes here
-        print("An error occurred: ${response.statusCode}");
+        print("An error occurred Activity: ${response.statusCode}");
         // Display a generic error message or implement other appropriate actions.
       }
     } catch (e) {
       // Handle any other exceptions that might occur during the process
-      print("An error occurred with error: $e");
+      print("An error occurred with error Pres: $e");
       // Display a generic error message or implement other appropriate actions.
     }
   }

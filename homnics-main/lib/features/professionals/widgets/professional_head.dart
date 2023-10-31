@@ -16,7 +16,7 @@ class ProfessionalHeader extends StatelessWidget {
           width: 100,
           child: CircleAvatar(
             radius: 30.0,
-            backgroundImage: NetworkImage("${professional.user?.avatar}"),
+            backgroundImage: NetworkImage("${professional.avatar}"),
             backgroundColor: Colors.transparent,
             child: Stack(children: [
               Align(
@@ -37,39 +37,35 @@ class ProfessionalHeader extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.all(8.0),
           child: Text(
-            professional.professionalType!.name+
-                '. ' +
-                professional.user!.firstName+
-                ' ' +
-                (professional.user!.lastName ?? ''),
+            professional.name ?? '',
             textAlign: TextAlign.left,
             style: TextStyle(
-                fontSize: 16,
-                fontFamily: 'RedHatDisplay',
-                fontWeight: FontWeight.w500,
-                //color: iconsColor
-                ),
+              fontSize: 16,
+              fontFamily: 'RedHatDisplay',
+              fontWeight: FontWeight.w500,
+              //color: iconsColor
+            ),
           ),
         ),
         Text(
           professional.getSpecialities,
           textAlign: TextAlign.left,
           style: TextStyle(
-              fontSize: 14,
-              fontFamily: 'RedHatDisplay',
-              fontWeight: FontWeight.w500,
-              //color: greyColor
-              ),
+            fontSize: 14,
+            fontFamily: 'RedHatDisplay',
+            fontWeight: FontWeight.w500,
+            //color: greyColor
+          ),
         ),
         Text(
           professional.title ?? "",
           textAlign: TextAlign.left,
           style: TextStyle(
-              fontSize: 14,
-              fontFamily: 'RedHatDisplay',
-              fontWeight: FontWeight.w500,
-              //color: iconsColor
-              ),
+            fontSize: 14,
+            fontFamily: 'RedHatDisplay',
+            fontWeight: FontWeight.w500,
+            //color: iconsColor
+          ),
         ),
         SizedBox(
           height: 8.0,
@@ -77,35 +73,33 @@ class ProfessionalHeader extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-           Container(
-        height: 20,
-        child: Row(
-          children: <Widget>[
-            Icon(
-              Icons.star,
-              color: Colors.amber,
+            Container(
+              height: 20,
+              child: Row(
+                children: <Widget>[
+                  Icon(
+                    Icons.star,
+                    color: Colors.amber,
+                  ),
+                  Icon(
+                    Icons.star,
+                    color: Colors.amber,
+                  ),
+                  Icon(
+                    Icons.star,
+                    color: Colors.amber,
+                  ),
+                  Icon(
+                    Icons.star_border,
+                    color: Colors.grey,
+                  ),
+                  Icon(
+                    Icons.star_border,
+                    color: Colors.grey,
+                  ),
+                ],
+              ),
             ),
-            Icon(
-              Icons.star,
-              color: Colors.amber,
-            ),
-            Icon(
-              Icons.star,
-              color: Colors.amber,
-            ),
-            Icon(
-              Icons.star_border,
-              color: Colors.grey,
-            ),
-            Icon(
-              Icons.star_border,
-              color: Colors.grey,
-            ),
-          ],
-        ),
-      ),
-
-
             Text(
               '(145)',
               textAlign: TextAlign.left,

@@ -17,6 +17,7 @@ import '../models/user-plan.dart';
 class UsersPlanController extends GetxController {
   final userPlanName = ''.obs;
   final planStartDate = ''.obs;
+  final planId = ''.obs;
 
   // Base
   BaseAPI base = BaseAPI();
@@ -63,17 +64,40 @@ class UsersPlanController extends GetxController {
     }
   }
 
-  Future<String> getPlanBeneficiarId() async {
-    var url = baseUrl + userPlanBeneficiaryUrl(await getActivePlanId());
+  // Future<String> getPlanBeneficiarId() async {
+  //   SharedPreferences _pref = await SharedPreferences.getInstance();
+  //   planId.value = (await _pref.getString("health_plan_id"))!;
+  //   var url = baseUrl + userPlanBeneficiaryUrl(planId.value);
+  //   print(url);
 
-    final response = await get(Uri.parse(url), headers: await base.myHeaders());
+  //   final response =
+  //       await get(Uri.parse(url), headers: await auth.userHeader());
+  //   print(response.body);
+  //   var result = json.decode(response.body);
+  //   print("RESULT : $result");
+  //   if (response.statusCode == 200) {
+  //     debugPrint("BENEFICIARY ID STATUS: ${response.statusCode}");
+  //     print(
+  //         "PLAN BENEFICIARY ID ::::: ${result['planBeneficiaries'][0]['id']}");
+  //     return result['planBeneficiaries'][0]['id'];
+  //   } else {
+  //     debugPrint("BENEFICIARY ID STATUS: ${response.statusCode}");
+  //     throw Exception('Failed to load data!');
+  //   }
+  // }
+
+  Future<String> getPlanBeneficiarId() async {
+    SharedPreferences _pref = await SharedPreferences.getInstance();
+    planId.value = (await _pref.getString("health_plan_id"))!;
+    var url = baseUrl + userPlanBeneficiaryUrl(planId.value);
+
+    final response =
+        await get(Uri.parse(url), headers: await auth.userHeader());
     var result = json.decode(response.body);
+
     if (response.statusCode == 200) {
-      debugPrint("BENEFICIARY ID STATUS: ${response.statusCode}");
-      // print(result['planBeneficiaries'][0]['id']);
       return result['planBeneficiaries'][0]['id'];
     } else {
-      debugPrint("BENEFICIARY ID STATUS: ${response.statusCode}");
       throw Exception('Failed to load data!');
     }
   }
@@ -97,6 +121,7 @@ class UsersPlanController extends GetxController {
       // updating our variable
       userPlanName.value = result['userPlans'][0]['plan']['name'];
       planStartDate.value = result['userPlans'][0]['startDate'];
+      planStartDate.value = result['userPlans'][0]['planId'];
       print(userPlanName);
       print(planStartDate);
       update();
@@ -131,11 +156,14 @@ class UsersPlanController extends GetxController {
         // updating our variable
         userPlanName.value = returnResponse.userPlans.first.plan.name;
         planStartDate.value = returnResponse.userPlans.first.startDate;
+        planId.value = returnResponse.userPlans.first.planId;
         // Save to local
         await _pref.setString("health_plan_name", userPlanName.value);
+        await _pref.setString("health_plan_id", planId.value);
         // Testing print outs
         print(userPlanName);
         print(planStartDate);
+        print(planId);
         return returnResponse;
       } else {
         print(

@@ -7,7 +7,9 @@ import 'package:homnics/features/user_account/profile_screen.dart';
 import 'package:homnics/features/user_account/screens/settings_screen.dart';
 import 'package:homnics/features/user_account/screens/subscription_screen.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../authentication/controller/authentication_controller.dart';
 import '../../HealthPlans/controllers/UserPlanController.dart';
 import '../../HealthPlans/models/health_plan_model.dart';
 import '../../auth/controllers/auth_api.dart';
@@ -23,6 +25,7 @@ class AccountScreen extends StatefulWidget {
 
 class _AccountScreenState extends State<AccountScreen> {
   var auth = Get.find<AuthAPI>();
+  var authenticationController = Get.find<AuthenticationController>();
   var userPlanController = Get.find<UsersPlanController>();
   // String? currentPlan;
   // User user = User(
@@ -47,26 +50,27 @@ class _AccountScreenState extends State<AccountScreen> {
   // String? firstName;
   // String? startDate;
   String? networkImage;
+  final currentPlan = "".obs;
 
   @override
   void initState() {
     // getuser();
     super.initState();
+    authenticationController.getCurrentLoggedInUser();
     // userDetails();
     //getHealthPlans();
   }
 
-  // Future<void> userDetails() async {
-  //   SharedPreferences _pref = await SharedPreferences.getInstance();
-  //   networkImage = auth.userInfo.value.avatar ??
-  //       'https://homnics-dump.s3.amazonaws.com/homnics-avatar/no_face.jpg';
-  //   firstName = user.firstName;
-  //   startDate = _pref.getString('user_plan_strt_date') ?? '';
-  //   currentPlan = _pref.getString("user_plan_name") ?? '';
-  // }
+  Future<void> getuserPlan() async {
+    SharedPreferences _pref = await SharedPreferences.getInstance();
+    currentPlan.value = (await _pref.getString("health_plan_name"))!;
+
+    print("CURRENT PLAN : $currentPlan");
+  }
 
   @override
   Widget build(BuildContext context) {
+    var user = authenticationController.userInfo;
     return Scaffold(
         appBar: AppBar(
           elevation: 0,
@@ -182,7 +186,7 @@ class _AccountScreenState extends State<AccountScreen> {
                                       Container(
                                         width: 200,
                                         child: Text(
-                                          auth.userInfo.value
+                                          user.value
                                               .firstName, //'${firstName ?? ''}',
                                           textAlign: TextAlign.left,
                                           overflow: TextOverflow.ellipsis,
@@ -201,8 +205,7 @@ class _AccountScreenState extends State<AccountScreen> {
                                   ),
                                   SizedBox(
                                     child: Text(
-                                      userPlanController.userPlanName
-                                          .value, //"${currentPlan ?? "Freemium"}",
+                                      "${currentPlan}", //"${currentPlan ?? "Freemium"}",
                                       textAlign: TextAlign.left,
                                       style: TextStyle(
                                           fontSize: 20,

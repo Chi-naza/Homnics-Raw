@@ -6,32 +6,40 @@ import '../../auth/models/user.dart';
 
 class Professional {
   String? id;
-  String? professionalTypeId;
-  ProfessionalType? professionalType;
+  dynamic professionalTypeId;
   String? applicationUserId;
-  User? user;
-  int? yearsOfExperience;
-  String? professionalStatus;
+  dynamic yearsOfExperience;
+  dynamic professionalStatus;
   bool? isActive;
   String? dateAdded;
   String? dateModified;
-  String? latitude;
-  String? longitude;
+  dynamic latitude;
+  dynamic longitude;
   String? licenseType;
   String? title;
   String? languages;
   String? specialties;
   String? availableDays;
   bool? isVerified;
-  String? gender;
+  dynamic gender;
   String? bio;
+  bool? hasUploadedPhotoId;
+  bool? hasUploadedLicence;
+  String? name;
+  String? email;
+  String? phoneNumber;
+  String? address;
+  String? avatar;
+  String? photoIdUrl;
+  String? licenceUrl;
+  bool? isLicenseVerified;
+  bool? isPhotoIdVerified;
+  dynamic rating;
 
   Professional({
     required this.id,
     this.professionalTypeId,
-    this.professionalType,
     this.applicationUserId,
-    this.user,
     this.yearsOfExperience,
     this.professionalStatus,
     this.isActive,
@@ -47,6 +55,18 @@ class Professional {
     this.isVerified,
     this.gender,
     this.bio,
+    this.hasUploadedPhotoId,
+    this.hasUploadedLicence,
+    this.name,
+    this.email,
+    this.phoneNumber,
+    this.address,
+    this.avatar,
+    this.photoIdUrl,
+    this.licenceUrl,
+    this.isLicenseVerified,
+    this.isPhotoIdVerified,
+    this.rating,
   });
 
   List<String> get getAvailability {
@@ -71,23 +91,36 @@ class Professional {
   Professional.fromJson(Map<String, dynamic> json) {
     id = json['id'].toString();
     applicationUserId = json['applicationUserId']?.toString();
-    professionalTypeId = json['professionalTypeId']?.toString();
-    yearsOfExperience = int.parse(json['yearsOfExperience'].toString());
-    professionalStatus = json['professionalStatus'].toString();
+    professionalTypeId = json['professionalTypeId'];
+    yearsOfExperience = json['yearsOfExperience'];
+    professionalStatus = json['professionalStatus'];
     isActive = json['isActive'];
     dateAdded = json['dateAdded']?.toString();
     dateModified = json['dateModified']?.toString();
-    latitude = json['latitude'].toString();
-    longitude = json['longitude'].toString();
+    latitude = json['latitude'];
+    longitude = json['longitude'];
     licenseType = json['licenseType']?.toString();
     title = json['title']?.toString();
     languages = json['languages'];
     specialties = json['specialties'];
     availableDays = json['availableDays'];
     isVerified = json['isVerified'];
-    gender = json['gender'].toString();
+    gender = json['gender'];
     bio = json['bio']?.toString();
+    hasUploadedPhotoId = json['hasUploadedPhotoId'];
+    hasUploadedLicence = json['hasUploadedLicence'];
+    name = json['name']?.toString();
+    email = json['email']?.toString();
+    phoneNumber = json['phoneNumber']?.toString();
+    address = json['address']?.toString();
+    avatar = json['avatar']?.toString();
+    photoIdUrl = json['photoIdUrl']?.toString();
+    licenceUrl = json['licenceUrl']?.toString();
+    isLicenseVerified = json['isLicenseVerified'];
+    isPhotoIdVerified = json['isPhotoIdVerified'];
+    rating = json['rating'];
   }
+
   //
   // Future<void> populateUserAndType() async {
   //   user = await User.getById(applicationUserId!);
@@ -130,9 +163,8 @@ class Professional {
   static Future<Professional> getProfessionalJson(
       Map<String, dynamic> json) async {
     var prof = Professional.fromJson(json);
-    prof.user = await User.getById(prof.applicationUserId!);
-    prof.professionalType =
-        await ProfessionalType.getById(prof.professionalTypeId!);
+    prof = await User.getById(prof.applicationUserId!);
+    prof = await ProfessionalType.getById(prof.professionalTypeId.toString());
     return prof;
   }
 }

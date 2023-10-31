@@ -16,6 +16,7 @@ import '../../HealthPlans/controllers/healthplan_api.dart';
 import '../../HealthPlans/models/health_plan_model.dart';
 import '../../appointment/screens/booking_calender.dart';
 
+import '../../appointment/screens/filtered_appointment_home.dart';
 import '../../notifications/screens/all_notifications.dart';
 import 'drawer.dart';
 
@@ -61,6 +62,7 @@ class _HomeScreenState extends State<HomeScreen> {
       GlobalKey<AppointmentListFilterState>();
   // String? fName;
   final currentPlan = "".obs;
+  final currentPlanId = "".obs;
   // User? userData;
 
   @override
@@ -493,11 +495,11 @@ class _HomeScreenState extends State<HomeScreen> {
                       padding: const EdgeInsets.all(8.0),
                       child: GestureDetector(
                         onTap: () {
-                          // Navigator.push(
-                          //     context,
-                          //     MaterialPageRoute(
-                          //         builder: (context) =>
-                          //             FiltteredAppointmentsHome()));
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      FiltteredAppointmentsHome()));
                         },
                         child: Text(
                           'See All >',
@@ -570,7 +572,9 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> getuserPlan() async {
     SharedPreferences _pref = await SharedPreferences.getInstance();
     currentPlan.value = (await _pref.getString("health_plan_name"))!;
+    currentPlanId.value = (await _pref.getString("health_plan_id"))!;
     print("CURRENT PLAN : $currentPlan");
+    print("CURRENT PLAN ID: $currentPlanId");
   }
 
   emergencyCall() async {

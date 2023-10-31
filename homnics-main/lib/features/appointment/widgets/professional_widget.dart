@@ -11,6 +11,8 @@ class ProfessionalWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print("PROFESSIONAL DETAILS : ${professional.bio}");
+    print("PROFESSIONAL NAME : ${professional.email}");
     return Column(
       children: [
         Card(
@@ -21,7 +23,7 @@ class ProfessionalWidget extends StatelessWidget {
               padding: const EdgeInsets.only(top: 8.0),
               child: CircleAvatar(
                 radius: 30,
-                backgroundImage: NetworkImage("${professional.user?.avatar}"),
+                backgroundImage: NetworkImage("${professional.avatar}"),
               ),
             ),
             //Icon(Icons.star),
@@ -30,14 +32,14 @@ class ProfessionalWidget extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '${professional.professionalType?.name}',
+                  '${professional.specialties}',
                   style: TextStyle(
                       fontSize: 14,
                       color: greyColor,
                       fontWeight: FontWeight.w800),
                 ),
                 Text(
-                  '${professional.user?.firstName} ${professional.user?.lastName}',
+                  '${professional.name}',
                   style: TextStyle(
                       fontSize: 16,
                       //color: textColor,

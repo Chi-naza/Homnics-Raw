@@ -4,6 +4,7 @@ import 'package:homnics/features/appointment/controllers/appointmentController.d
 import 'package:homnics/features/appointment/models/appointment.dart';
 import 'package:homnics/features/appointment/screens/appointment_success_screen.dart';
 import 'package:homnics/features/home/screen/navigation_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../professionals/models/professionals.dart';
 import '../../professionals/widgets/professional_head.dart';
@@ -11,20 +12,24 @@ import '../../professionals/widgets/professional_head.dart';
 class BookingSummary extends StatefulWidget {
   Professional professional;
   Appointment appointment;
+  String dateInput;
+  String timeInput;
   BookingSummary(
-      {required this.professional, required this.appointment, super.key});
+      {required this.professional,
+      required this.appointment,
+      required this.dateInput,
+      required this.timeInput,
+      super.key});
 
   @override
   State<BookingSummary> createState() => _BookingSummaryState();
 }
 
 class _BookingSummaryState extends State<BookingSummary> {
-  TextEditingController dateinput = TextEditingController();
   TextEditingController additionalInfoController = TextEditingController();
 
   @override
   void initState() {
-    dateinput.text = "";
     additionalInfoController.text =
         widget.appointment.additionalInfo ?? "No additonal Info";
     //set the initial value of text field
@@ -43,7 +48,7 @@ class _BookingSummaryState extends State<BookingSummary> {
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-       // backgroundColor: appBarColor,
+        // backgroundColor: appBarColor,
         automaticallyImplyLeading: false,
         centerTitle: true,
         leading: Padding(
@@ -74,8 +79,8 @@ class _BookingSummaryState extends State<BookingSummary> {
         actions: [
           GestureDetector(
             onTap: () {
-               Navigator.of(context)
-        .push(MaterialPageRoute(builder: (_) => NavigationScreen()));
+              Navigator.of(context)
+                  .push(MaterialPageRoute(builder: (_) => NavigationScreen()));
             },
             child: Padding(
               padding: const EdgeInsets.all(8.0),
@@ -116,10 +121,10 @@ class _BookingSummaryState extends State<BookingSummary> {
                         ),
                         FittedBox(
                           child: Text(
-                            (widget.appointment.appointmentDate
-                                    ?.split(" ")
-                                    .first) ??
-                                "No Date",
+                            // (widget.appointment.appointmentDate
+                            //         ?.split(" ")
+                            //         .first)
+                            widget.dateInput ?? "No Date",
                             style: TextStyle(
                                 fontSize: 16,
                                 fontFamily: 'RedHatDisplay',
@@ -130,27 +135,27 @@ class _BookingSummaryState extends State<BookingSummary> {
                       ],
                     ),
                   ),
-                  // SizedBox(width: 60.0),
-                  // Expanded(
-                  //   flex: 1,
-                  //   child: Column(
-                  //     children: [
-                  //       Icon(
-                  //         Icons.access_time_outlined,
-                  //         size: 20,
-                  //         color: secondaryFillColor,
-                  //       ),
-                  //       Text(
-                  //         '5:00 pm',
-                  //         style: TextStyle(
-                  //             fontSize: 16,
-                  //             fontFamily: 'RedHatDisplay',
-                  //             fontWeight: FontWeight.w400,
-                  //             color: secondaryFillColor),
-                  //       )
-                  //     ],
-                  //   ),
-                  // ),
+                  SizedBox(width: 60.0),
+                  Expanded(
+                    flex: 1,
+                    child: Column(
+                      children: [
+                        Icon(
+                          Icons.access_time_outlined,
+                          size: 20,
+                          color: secondaryFillColor,
+                        ),
+                        Text(
+                          widget.timeInput ?? "",
+                          style: TextStyle(
+                              fontSize: 16,
+                              fontFamily: 'RedHatDisplay',
+                              fontWeight: FontWeight.w400,
+                              color: secondaryFillColor),
+                        )
+                      ],
+                    ),
+                  ),
                   SizedBox(
                     width: 60.0,
                   ),

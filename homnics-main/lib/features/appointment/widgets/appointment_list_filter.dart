@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../../common/utils/colors.dart';
 import '../controllers/appointmentController.dart';
+import '../models/meeting.dart';
+import '../screens/meetingpoint.dart';
 import 'ecg_loader.dart';
 
 class AppointmentListFilter extends StatefulWidget {
@@ -29,8 +31,8 @@ class AppointmentListFilterState extends State<AppointmentListFilter> {
       });
       latestAppointment =
           await AppointmentController().getAppointmentByStatus(context, status);
-          // print(":::::status::::::${await AppointmentController().getAppointmentByStatus(context, status)}");
-          //  print("Appointments with status $status: $latestAppointment");
+      // print(":::::status::::::${await AppointmentController().getAppointmentByStatus(context, status)}");
+      //  print("Appointments with status $status: $latestAppointment");
     } else {
       latestAppointment =
           await AppointmentController().getAllAppointments(context);
@@ -66,7 +68,6 @@ class AppointmentListFilterState extends State<AppointmentListFilter> {
     }
 
     return Column(
-      
       children: [
         if (latestAppointment.isEmpty)
           Container(
@@ -98,94 +99,101 @@ class AppointmentListFilterState extends State<AppointmentListFilter> {
             ),
           ),
         Container(
-          height: MediaQuery.of(context).size.height / 5,
-          padding: EdgeInsets.only(bottom: 61, top: 10,left: 2,right: 2),
+          height: MediaQuery.of(context).size.height,
+          padding: EdgeInsets.only(bottom: 61, top: 10, left: 2, right: 2),
           child: ListView.builder(
               itemCount: latestAppointment.length,
               itemBuilder: (BuildContext context, int index) {
                 var appointment = latestAppointment[index];
                 String appointmentDate = appointment['appointmentDate'];
                 DateTime parsedDate = DateTime.parse(appointmentDate);
-                String formattedDate = DateFormat('MMM dd, yyyy hh:mm a').format(parsedDate);
+                String formattedDate =
+                    DateFormat('MMM dd, yyyy hh:mm a').format(parsedDate);
 
-                return  Padding(
-      padding: const EdgeInsets.only(top: 16.0,),
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(right: 8),
-                child: InkWell(
-                  onTap: () {
-                    setState(() {});
-                  },
-                  child: Container(
-                    height: 32,
-                    width: 32,
-                    decoration: BoxDecoration(
-                        border: Border.all(
-                          color: greyColor,
-                          width: 1.0,
+                return Padding(
+                  padding: const EdgeInsets.only(
+                    top: 16.0,
+                  ),
+                  child: InkWell(
+                    onTap: () async {
+                      Meeting? meeting = await AppointmentController()
+                          .fixMeeting(appointment['id']);
+                      String url = meeting?.meetingLink ?? '';
+                      if (url.isNotEmpty) {
+                        Navigator.of(context).push(MaterialPageRoute(
+                            builder: (_) => MeetingPoint(meeting: meeting!)));
+                      }
+                    },
+                    child: Column(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.only(right: 8),
+                              child: InkWell(
+                                onTap: () async {},
+                                child: Container(
+                                  height: 32,
+                                  width: 32,
+                                  decoration: BoxDecoration(
+                                      border: Border.all(
+                                        color: greyColor,
+                                        width: 1.0,
+                                      ),
+                                      borderRadius: BorderRadius.circular(16),
+                                      shape: BoxShape.rectangle,
+                                      color: appBarColor),
+                                  child: Icon(
+                                    Icons.calendar_month_outlined,
+                                    size: 18,
+                                    color: primaryColor,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'You have a ${appointment['appointmentStatus']} appointment:',
+                                  textAlign: TextAlign.left,
+                                  style: TextStyle(
+                                      fontSize: 16,
+                                      fontFamily: 'RedHatDisplay',
+                                      fontWeight: FontWeight.w500,
+                                      color: secondaryFillColor),
+                                ),
+                                Text(
+                                  '${appointment['professionalName']}',
+                                  textAlign: TextAlign.left,
+                                  style: TextStyle(
+                                      fontSize: 16,
+                                      fontFamily: 'RedHatDisplay',
+                                      fontWeight: FontWeight.w400,
+                                      color: iconsColor),
+                                ),
+                                Text(
+                                  'Date: ${formattedDate}',
+                                  textAlign: TextAlign.left,
+                                  style: TextStyle(
+                                      fontSize: 14,
+                                      fontFamily: 'RedHatDisplay',
+                                      fontWeight: FontWeight.w500,
+                                      color: greyColor),
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
-                        borderRadius: BorderRadius.circular(16),
-                        shape: BoxShape.rectangle,
-                        color: appBarColor),
-                    child: Icon(
-                      Icons.calendar_month_outlined,
-                      size: 18,
-                      color: primaryColor,
+                        SizedBox(
+                          height: 8.0,
+                        ),
+                        Divider(color: greyColor),
+                      ],
                     ),
                   ),
-                ),
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'You have a ${appointment['appointmentStatus']} appointment:',
-                    textAlign: TextAlign.left,
-                    style: TextStyle(
-                        fontSize: 16,
-                        fontFamily: 'RedHatDisplay',
-                        fontWeight: FontWeight.w500,
-                        color: secondaryFillColor),
-                  ),
-                  Text(
-                    '${appointment['professionalName']}',
-                    textAlign: TextAlign.left,
-                    style: TextStyle(
-                        fontSize: 16,
-                        fontFamily: 'RedHatDisplay',
-                        fontWeight: FontWeight.w400,
-                        color: iconsColor),
-                  ),
-                  Text(
-                    'Date: ${formattedDate}',
-                    textAlign: TextAlign.left,
-                    style: TextStyle(
-                        fontSize: 14,
-                        fontFamily: 'RedHatDisplay',
-                        fontWeight: FontWeight.w500,
-                        color: greyColor),
-                  ),
 
-                  
-                ],
-              ),
-            ],
-          ),
-          SizedBox(
-            height: 8.0,
-          ),
-          Divider(color: greyColor),
-
-
-
-        ],
-      ),
-    
                   // ListTile(
                   //     leading: Padding(
                   //       padding: const EdgeInsets.only(top: 22.0),
@@ -200,15 +208,6 @@ class AppointmentListFilterState extends State<AppointmentListFilter> {
                   //         Text('Date: ${appointment['appointmentDate']}')
                   //       ],
                   //     ),
-                  //     onTap: () async {
-                  //       Meeting? meeting = await AppointmentController()
-                  //           .fixMeeting(appointment['id']);
-                  //       String url = meeting?.meetingLink ?? '';
-                  //       if (url.isNotEmpty) {
-                  //         Navigator.of(context).push(MaterialPageRoute(
-                  //             builder: (_) => MeetingPoint(meeting: meeting!)));
-                  //       }
-                  //     }),
                 );
               }),
         ),

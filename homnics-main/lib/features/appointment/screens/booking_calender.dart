@@ -71,50 +71,18 @@ class _BookingsCalenderState extends State<BookingsCalender> {
                   onPressed: (() {
                     processNext();
                   }),
-                  child: Text('Next'))
+                  child: Text('Next')),
             ],
           ),
         ),
       ),
     );
   }
-  //  getValueText(
-  //   CalendarDatePicker2Type datePickerType,
-  //   List<DateTime?> values,
-  // ) {
-  //   values =
-  //       values.map((e) => e != null ? DateUtils.dateOnly(e) : null).toList();
-  //   var valueText = (values.isNotEmpty ? values[0] : null)
-  //       .toString()
-  //       .replaceAll('00:00:00.000', '');
-
-  //   if (datePickerType == CalendarDatePicker2Type.multi) {
-  //     valueText = values.isNotEmpty
-  //         ? values
-  //             .map((v) => v.toString().replaceAll('00:00:00.000', ''))
-  //             .join(', ')
-  //         : 'null';
-  //   } else if (datePickerType == CalendarDatePicker2Type.range) {
-  //     if (values.isNotEmpty) {
-  //       final startDate = values[0].toString().replaceAll('00:00:00.000', '');
-  //       final endDate = values.length > 1
-  //           ? values[1].toString().replaceAll('00:00:00.000', '')
-  //           : 'null';
-  //       valueText = '$startDate to $endDate';
-  //     } else {
-  //       return 'null';
-  //     }
-  //   }
-
-  //   return valueText;
-  // }
 
   Widget _buildDefaultSingleDatePickerWithValue() {
     final config = CalendarDatePicker2Config(
-      
       selectedDayHighlightColor: primaryColor,
       weekdayLabels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-      //TODO : this arrow back button still functions i just changed the color
       lastMonthIcon: Icon(
         Icons.arrow_back_ios,
         color: Colors.white,
@@ -205,11 +173,6 @@ class _BookingsCalenderState extends State<BookingsCalender> {
           initialEntryMode: TimePickerEntryMode.dial,
           // orientation: orientation,
           builder: (BuildContext context, Widget? pikin) {
-            // We just wrap these environmental changes around the
-            // child in this builder so that we can apply the
-            // options selected above. In regular usage, this is
-            // rarely necessary, because the default values are
-            // usually used as-is.
             return Theme(
               data: Theme.of(context).copyWith(
                 materialTapTargetSize: MaterialTapTargetSize.padded,
@@ -241,15 +204,47 @@ class _BookingsCalenderState extends State<BookingsCalender> {
     );
   }
 
+  // Future<void> processNext() async {
+  //   String formattedDate =
+  //       intl.DateFormat('yyyy-MM-dd').format(chosenDate.first!);
+  //   print(formattedDate);
+  //   String formattedTime = intl.DateFormat('h:mm a').format(DateTime(
+  //       chosenDate.first!.year,
+  //       chosenDate.first!.month,
+  //       chosenDate.first!.day,
+  //       selectedTime!.hour,
+  //       selectedTime!.minute));
+
+  //   SharedPreferences _pref = await SharedPreferences.getInstance();
+  //   await _pref.setString("new_appointment_date", formattedDate);
+  //   await _pref.setString("new_appointment_Time", formattedTime);
+
+  //   Navigator.push(
+  //       context,
+  //       MaterialPageRoute(
+  //           builder: (context) =>
+  //               AvailableProfessionalScreen(date: formattedDate)));
+  // }
+
   Future<void> processNext() async {
-    String formattedDate =
+    String formattedDateTime =
         intl.DateFormat('yyyy-MM-dd').format(chosenDate.first!);
-    print(formattedDate);
-  String formattedTime = intl.DateFormat('h:mm a').format(DateTime(chosenDate.first!.year, chosenDate.first!.month, chosenDate.first!.day, selectedTime!.hour, selectedTime!.minute));
+
+    String formattedTime = intl.DateFormat('h:mm a').format(DateTime(
+        chosenDate.first!.year,
+        chosenDate.first!.month,
+        chosenDate.first!.day,
+        selectedTime!.hour,
+        selectedTime!.minute));
+
+    // Format the date and time to match "dateAdded" format with timezone offset
+    String formattedDate =
+        intl.DateFormat('yyyy-MM-ddTHH:mm:ss').format(chosenDate.first!);
 
     SharedPreferences _pref = await SharedPreferences.getInstance();
     await _pref.setString("new_appointment_date", formattedDate);
-    await _pref.setString("new_appointment_Time", formattedTime);
+    await _pref.setString("new_appointment_Time", formattedDateTime);
+    await _pref.setString("new_appointment_formatted_time", formattedTime);
 
     Navigator.push(
         context,

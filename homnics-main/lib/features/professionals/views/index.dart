@@ -26,6 +26,7 @@ class _ProfessionalScreenState extends State<ProfessionalScreen> {
   initState() {
     getData();
     super.initState();
+    _getProfessionals();
   }
 
   @override
@@ -188,6 +189,7 @@ class _ProfessionalScreenState extends State<ProfessionalScreen> {
     print("here");
     List<Professional> professionals = await ProfessionController()
         .getProfessionals(pageNumber: 1, pageSize: 10, searchParam: "");
+    print("Hello");
     return professionals;
   }
 
