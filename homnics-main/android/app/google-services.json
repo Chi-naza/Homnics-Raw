@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "306928388819",
+    "project_id": "homnics-6c40b",
+    "storage_bucket": "homnics-6c40b.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:306928388819:android:63ed93e9635b0480aea226",
+        "android_client_info": {
+          "package_name": "com.ahegel.homnics"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "306928388819-i1b4a69b917flbkpdpjfq93okhsioum8.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCAkC8yz4f6kFn34OYMFkelv9Zijmvlq8A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "306928388819-i1b4a69b917flbkpdpjfq93okhsioum8.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
