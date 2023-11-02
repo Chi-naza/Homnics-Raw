@@ -37,24 +37,6 @@ class _NavDrawerState extends State<NavDrawer> {
                 SlidersScreen())); // Replace '/login' with your login route
   }
 
-  // User user = User(
-  //   id: '',
-  //   email: '',
-  //   phone: '',
-  //   password: '',
-  //   firstName: '',
-  //   lastName: '',
-  //   address: '',
-  //   emergencyContactName: '',
-  //   emergencyContactPhone: '',
-  //   city: '',
-  //   state: '',
-  //   country: '',
-  //   postalCode: '',
-  //   gender: '',
-  //   emergencyContactRelationship: '',
-  //   dateOfBirth: '',
-  // );
   String networkImage =
       'https://homnics-dump.s3.amazonaws.com/homnics-avatar/no_face.jpg';
   String? useremail;
@@ -65,24 +47,10 @@ class _NavDrawerState extends State<NavDrawer> {
     super.initState();
   }
 
-  getuser() async {
-    // Use to get local stored user
-    // user = auth.userInfo.value;
-    // User userDetailDisplay = await AuthAPI().getCurrentUser();
-    // setState(() {
-    //   userData = userDetailDisplay;
-    // });
-
-    // SharedPreferences _pref = await SharedPreferences.getInstance();
-    // networkImage = _pref.getString("avatar") ?? networkImage;
-    // name = _pref.getString("user_firstname") ?? user.email;
-    //  networkImage = user.avatar!;
-    //  name = user.firstName;
-  }
-
   @override
   Widget build(BuildContext context) {
-    print(useremail);
+    var user = authenticationController.userInfo;
+
     return Container(
       color: Theme.of(context).drawerTheme.backgroundColor,
       // color: Colors.white,
@@ -93,7 +61,7 @@ class _NavDrawerState extends State<NavDrawer> {
             child: Column(
               children: [
                 CachedNetworkImage(
-                  imageUrl: networkImage,
+                  imageUrl: user.value.avatar,
                   placeholder: (context, image) => CircularProgressIndicator(),
                   imageBuilder: (context, image) => CircleAvatar(
                     backgroundImage: image,
@@ -107,8 +75,10 @@ class _NavDrawerState extends State<NavDrawer> {
                 ),
                 SizedBox(height: 14),
                 Text(
-                  "$useremail",
+                  "${user.value.fullName}",
                   textAlign: TextAlign.left,
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
                   style: TextStyle(
                       fontFamily: 'RedHatDisplay',
                       fontWeight: FontWeight.w700,

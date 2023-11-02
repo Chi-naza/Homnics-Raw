@@ -14,8 +14,11 @@ import '../../../services/base_api.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../authentication/controller/authentication_controller.dart';
 import '../auth/user_auth/controllers/progressHUD.dart';
+import 'api/benefitiaryApi.dart';
 import 'api/benefitiary_model.dart';
+import 'api/create_beneficiary_request_model.dart';
 
 class NewBeneficiaryScreen extends StatefulWidget {
   final Map? addedBenefitiary;
@@ -32,6 +35,8 @@ class _NewBeneficiaryScreenState extends State<NewBeneficiaryScreen> {
 
   final _globalKey = GlobalKey<FormState>();
   BenefitiaryRequestModel benefitiaryRequestModel = BenefitiaryRequestModel();
+  BenefitiaryController beneficiaryController = BenefitiaryController();
+  var authenticationController = Get.find<AuthenticationController>();
 
   bool isApiCallProcess = false;
   bool _isCheck = false;
@@ -665,7 +670,44 @@ class _NewBeneficiaryScreenState extends State<NewBeneficiaryScreen> {
                     width: double.infinity,
                     child: ElevatedButton(
                       onPressed: () async {
-                        isEdit ? updateBenefitiary() : makePostRequest();
+                        isEdit
+                            ? updateBenefitiary(CreateBeneficiaryRequestModel(
+                                userPlanId:
+                                    "aa681ba1-bd8e-41b2-3c48-08dbc33bcc51",
+                                firstName: _firstNameController.text,
+                                lastName: _lastNameController.text,
+                                middleName: _middleNameController.text,
+                                suffix: _surfixController.text,
+                                gender: 0,
+                                dateOfBirth: DateTime.parse("2023-10-30"),
+                                addressLine1: _addressController.text,
+                                addressLine2: '',
+                                city: _cityController.text,
+                                state: _stateController.text,
+                                zipCode: _zipCodeController.text,
+                                phoneNumber: _mobileNumberController.text,
+                                email: _emailController.text,
+                                country: _countryController.text,
+                              ))
+                            : beneficiaryController
+                                .makePostRequest(CreateBeneficiaryRequestModel(
+                                userPlanId:
+                                    "aa681ba1-bd8e-41b2-3c48-08dbc33bcc51",
+                                firstName: _firstNameController.text,
+                                lastName: _lastNameController.text,
+                                middleName: _middleNameController.text,
+                                suffix: _surfixController.text,
+                                gender: 0,
+                                dateOfBirth: DateTime.parse("2023-10-30"),
+                                addressLine1: _addressController.text,
+                                addressLine2: '',
+                                city: _cityController.text,
+                                state: _stateController.text,
+                                zipCode: _zipCodeController.text,
+                                phoneNumber: _mobileNumberController.text,
+                                email: _emailController.text,
+                                country: _countryController.text,
+                              ));
                       },
                       child: isEdit
                           ? Text('update beneficiary')
@@ -703,12 +745,13 @@ class _NewBeneficiaryScreenState extends State<NewBeneficiaryScreen> {
     }
   }
 
-  getToken() async {
-    SharedPreferences _pref = await SharedPreferences.getInstance();
-    return _pref.getString("user_token") ?? '';
-  }
+  // getToken() async {
+  //   SharedPreferences _pref = await SharedPreferences.getInstance();
+  //   return _pref.getString("user_token") ?? '';
+  // }
 
-  Future<void> updateBenefitiary() async {
+  Future<void> updateBenefitiary(
+      CreateBeneficiaryRequestModel createBeneficiaryRequestModel) async {
     final addedBenefitiary = widget.addedBenefitiary;
 
     if (addedBenefitiary == null) {
@@ -717,11 +760,11 @@ class _NewBeneficiaryScreenState extends State<NewBeneficiaryScreen> {
     }
 
     final url = Uri.parse('https://api.homnics.com/user-api/plan/beneficiary');
-    var payload = json.encode(await updateBenefitairyMethod);
+    var payload = json.encode(createBeneficiaryRequestModel.toJson());
     try {
       final response = await http.put(
         url,
-        headers: await BaseAPI().myHeaders(),
+        headers: await authenticationController.userHeader(),
         body: payload,
       );
 
@@ -752,40 +795,6 @@ class _NewBeneficiaryScreenState extends State<NewBeneficiaryScreen> {
     }
 
     throw Exception('An error occurred while making the PUT request.');
-  }
-
-  Future<bool> makePostRequest() async {
-    final url = Uri.parse('https://api.homnics.com/user-api/plan/beneficiary');
-    var payload = json.encode(await newMethod);
-    try {
-      final response = await http.post(
-        url,
-        headers: await BaseAPI().myHeaders(),
-        body: payload,
-      );
-
-      if (response.statusCode < 400) {
-        print('POST request successful!');
-        const snackBar = SnackBar(
-          content: Text('Benefitiary Added!'),
-        );
-        ScaffoldMessenger.of(context).showSnackBar(snackBar);
-        print('Response: ${response.body}');
-        print('Response::: ${response}');
-        print('Response Statuse Code ${response.statusCode}');
-
-        final route =
-            MaterialPageRoute(builder: (context) => BenefitiaryListScreen());
-        Navigator.push(context, route);
-        return true;
-        //return BenefitiaryRequestModel.fromJson(jsonDecode(response.body));
-      } else {
-        print('POST request failed with status code: ${response.statusCode}');
-      }
-    } catch (error) {
-      print('Error making POST request: $error');
-    }
-    throw Exception('An error occurred while making the POST request.');
   }
 
   Future<Map<String, dynamic>> get newMethod async {

@@ -1,17 +1,3 @@
-// "userId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-// "planId": 50,
-// "planDurationId": 10,
-// "startDate": "2023-05-01",
-// "startImmediately": true
-//
-//
-//
-//
-// {
-// "userPlanId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-// "paymentStatus": 0
-// }
-
 class UserPlan {
   String? id;
   String userId;

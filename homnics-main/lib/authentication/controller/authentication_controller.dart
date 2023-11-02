@@ -16,6 +16,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthenticationController extends GetxController {
   // user
+  final currentUserId = "".obs;
   final userInfo = CurrentLoggedInUserModel(
     userId: '',
     email: '',
@@ -149,43 +150,43 @@ class AuthenticationController extends GetxController {
     return false;
   }
 
-  Future<User> getCurrentUser() async {
-    var url = baseUrl + getCurrentUserUrl();
-    final response =
-        await get(Uri.parse(url), headers: {}); // await base.myHeaders());
+  // Future<User> getCurrentUser() async {
+  //   var url = baseUrl + getCurrentUserUrl();
+  //   final response =
+  //       await get(Uri.parse(url), headers: {}); // await base.myHeaders());
 
-    if (response.statusCode == 200) {
-      debugPrint("STATUS: ${response.statusCode}");
-      // populating the the user details instance s
-      // userInfo.value = User.fromJson(json.decode(response.body));
-      // userInfo.refresh();
-      debugPrint("GOTTEN USER: ${response.body}");
-      // debugPrint("GOTTEN USER: $userInfo");
-      return User.fromJson(json.decode(response.body));
-    } else {
-      debugPrint("USER NOT GOTTEN ::::: STATUS: ${response.statusCode}");
-      debugPrint("USER NOT GOTTEN ::::: BODY: ${response.body}");
-      final user = User(
-        id: '',
-        email: '',
-        phone: '',
-        password: '',
-        firstName: '',
-        lastName: '',
-        address: '',
-        emergencyContactName: '',
-        emergencyContactPhone: '',
-        city: '',
-        state: '',
-        country: '',
-        postalCode: '',
-        gender: '',
-        emergencyContactRelationship: '',
-        dateOfBirth: '',
-      );
-      return user;
-    }
-  }
+  //   if (response.statusCode == 200) {
+  //     debugPrint("STATUS: ${response.statusCode}");
+  //     // populating the the user details instance s
+  //     // userInfo.value = User.fromJson(json.decode(response.body));
+  //     // userInfo.refresh();
+  //     debugPrint("GOTTEN USER: ${response.body}");
+  //     // debugPrint("GOTTEN USER: $userInfo");
+  //     return User.fromJson(json.decode(response.body));
+  //   } else {
+  //     debugPrint("USER NOT GOTTEN ::::: STATUS: ${response.statusCode}");
+  //     debugPrint("USER NOT GOTTEN ::::: BODY: ${response.body}");
+  //     final user = User(
+  //       id: '',
+  //       email: '',
+  //       phone: '',
+  //       password: '',
+  //       firstName: '',
+  //       lastName: '',
+  //       address: '',
+  //       emergencyContactName: '',
+  //       emergencyContactPhone: '',
+  //       city: '',
+  //       state: '',
+  //       country: '',
+  //       postalCode: '',
+  //       gender: '',
+  //       emergencyContactRelationship: '',
+  //       dateOfBirth: '',
+  //     );
+  //     return user;
+  //   }
+  // }
 
   // CUSTOM SNACKBAR
 
@@ -289,17 +290,16 @@ class AuthenticationController extends GetxController {
           "Authorization": "Bearer $toKen",
         },
       );
-      print(response.body);
-      print(response.statusCode);
 
       if (response.statusCode == 200) {
         final json = jsonDecode(response.body);
 
         var returnedData = CurrentLoggedInUserModel.fromJson(json);
         userInfo.value = returnedData;
+        currentUserId.value = returnedData.userId;
         userInfo.refresh();
 
-        print("RETURNED DATA : $returnedData");
+        print("RETURNED DATA : ${returnedData.userId}");
         print("USER INFO : $returnedData");
         return returnedData;
       } else {

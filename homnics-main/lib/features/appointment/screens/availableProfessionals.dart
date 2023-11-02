@@ -156,6 +156,7 @@ class _AvailableProfessionalScreenState
                                         Professional professional =
                                             snapshot.data![index];
                                         return ProfessionalWidget(
+                                            dateSelected: widget.date,
                                             professional: professional);
                                       }),
                                 ),

@@ -694,13 +694,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
       isApiCallProcess = true;
     });
 
-    var (userId, email, password, token) =
-        await authenticationController.fetchUserData();
+    // var (userId, email, password, token) =
+    //     await authenticationController.fetchUserData();
+    var user = authenticationController.userInfo;
+
     DateTime parsedDate =
         DateTime.parse(selectedDate.toString().substring(0, 10));
 
     await authenticationController.updateUserInformation(UpdateUserRequestModel(
-        userId: userId,
+        userId: user.value.userId,
         firstName: _firstNameController.text,
         lastName: _lastNameController.text,
         phoneNumber: _mobileNumberController.text,
@@ -841,22 +843,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
     // Retrieve the user's data, for example, from your authentication controller
     var userData = await authenticationController.getCurrentLoggedInUser();
 
-    if (userData != null) {
+    var user = authenticationController.userInfo;
+    print("object");
+    print(user.value.emergencyContactName);
+    if (user != null) {
       // User data exists
       setState(() {
-        _firstNameController.text = userData.firstName;
-        _lastNameController.text = userData.lastName;
-        _mobileNumberController.text = userData.phone;
-        _cityController.text = userData.city;
-        _stateController.text = userData.state;
-        _countryController.text = userData.country;
-        _postalCodeController.text = userData.postalCode;
-        _addressController.text = userData.address;
-        _dateOfBirthController.text = userData.dateOfBirth as String;
-        // selectedGenderId = userData.gender.to;
-        _emergencyContactNameController.text = userData.emergencyContactName;
-        // selectedRelationshipId = userData.emergencyContactRelationship;
-        _emergencyContactNumberController.text = userData.emergencyContactPhone;
+        _firstNameController.text = user.value.firstName;
+        _lastNameController.text = user.value.lastName;
+        _mobileNumberController.text = user.value.phone;
+        _cityController.text = user.value.city;
+        _stateController.text = user.value.state;
+        _countryController.text = user.value.country;
+        _postalCodeController.text = user.value.postalCode;
+        _addressController.text = user.value.address;
+        _dateOfBirthController.text = user.value.dateOfBirth as String;
+        selectedGenderId = int.parse(user.value.gender);
+        _emergencyContactNameController.text = user.value.emergencyContactName;
+        selectedRelationshipId =
+            int.parse(user.value.emergencyContactRelationship);
+        _emergencyContactNumberController.text =
+            user.value.emergencyContactPhone;
         // Update other controllers with relevant data
         userDataLoaded = true;
       });

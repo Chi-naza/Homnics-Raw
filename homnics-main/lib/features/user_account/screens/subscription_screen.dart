@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:get/get.dart';
 import 'package:homnics/common/utils/colors.dart';
 import 'package:homnics/features/Subscription/benefitiary_list.dart';
 import 'package:homnics/features/Subscription/user_plans_details.dart';
@@ -7,6 +8,8 @@ import 'package:homnics/features/home/screen/navigation_screen.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../HealthPlans/controllers/UserPlanController.dart';
+import '../../HealthPlans/models/user_plan_active.dart';
 import '../../home/screen/account_screen.dart';
 
 class SubscriptionScreen extends StatefulWidget {
@@ -17,25 +20,38 @@ class SubscriptionScreen extends StatefulWidget {
 }
 
 class _SubscriptionScreenState extends State<SubscriptionScreen> {
-  String? currentPlan;
-  String? endDate;
+  // String? currentPlan;
+  // String? endDate;
+  var userPlanController = Get.put(UsersPlanController());
+  UserplansActivePayload? userplansActivePayload;
 
-  Future<void> userHealthPlan() async {
-    SharedPreferences _pref = await SharedPreferences.getInstance();
+  // Future<void> userHealthPlan() async {
+  //   SharedPreferences _pref = await SharedPreferences.getInstance();
 
-    setState(() {
-      currentPlan = _pref.getString("user_plan_name") ?? '';
-      endDate = _pref.getString('user_plan_end_date') ?? '';
-    });
+  //   setState(() {
+  //     currentPlan = _pref.getString("user_plan_name") ?? '';
+  //     endDate = _pref.getString('user_plan_end_date') ?? '';
+  //   });
 
-    print(endDate);
-  }
+  //   print(endDate);
+  // }
 
   @override
   void initState() {
-    // TODO: implement initState
-    userHealthPlan();
+    userPlanController.getCurrentUserPlan();
     super.initState();
+    apiCallGetPlan();
+  }
+
+  Future<void> apiCallGetPlan() async {
+    final UserplansActivePayload? response =
+        await userPlanController.getCurrentUserPlan();
+
+    if (response != null) {
+      setState(() {
+        userplansActivePayload = response;
+      });
+    }
   }
 
   @override
@@ -90,7 +106,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            "${currentPlan?.toUpperCase()}",
+                            "${userPlanController.userPlanName.value.toUpperCase()}",
                             style: TextStyle(
                               //color: textColor,
                               fontSize: 16,
@@ -102,7 +118,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                             height: 9.0,
                           ),
                           Text(
-                            '${endDate?.split("T")[0] ?? " "}',
+                            'Plan Started : ${userPlanController.planStartDate.value.split("T")[0]}',
                             style: TextStyle(
                               //color: textColor,
                               fontSize: 16,
@@ -116,7 +132,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                     GestureDetector(
                       onTap: () {},
                       child: Text(
-                        "One-time",
+                        userPlanController.planPaymentStatus.value,
                         style: TextStyle(
                           //color: textColor,
                           fontSize: 12,
@@ -233,13 +249,18 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                                     builder: (context) =>
                                         UserPlansDetailsScreen()));
                           },
-                          child: Text(
-                            "view all",
-                            style: TextStyle(
-                              color: primaryColor,
-                              fontSize: 14,
-                              fontFamily: 'RedHatDisplay',
-                              fontWeight: FontWeight.w400,
+                          child: GestureDetector(
+                            onTap: () {
+                              displayBottomSheet();
+                            },
+                            child: Text(
+                              "More>",
+                              style: TextStyle(
+                                color: primaryColor,
+                                fontSize: 14,
+                                fontFamily: 'RedHatDisplay',
+                                fontWeight: FontWeight.w400,
+                              ),
                             ),
                           ),
                         ),
@@ -248,7 +269,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                     Padding(
                       padding: const EdgeInsets.all(12.0),
                       child: Text(
-                        "4 People",
+                        "${userPlanController.planBeneficiaryMembers.value} Person(s)",
                         style: TextStyle(
                           color: secondaryFillColor,
                           fontSize: 16,
@@ -471,5 +492,93 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
             ),
           ),
         ));
+  }
+
+  Future displayBottomSheet() {
+    return showModalBottomSheet(
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(30))),
+      context: context,
+      builder: (context) => Container(
+        padding: EdgeInsets.all(20),
+        height: 200,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Text(
+              "${userPlanController.planDescription.value}",
+              style: TextStyle(
+                color: secondaryFillColor,
+                fontSize: 16,
+                fontFamily: 'RedHatDisplay',
+                fontWeight: FontWeight.w400,
+              ),
+            ),
+            Text(
+              DateFormat('EEE, d MMM y').format(
+                  DateTime.parse("${userPlanController.planStartDate.value}")),
+              style: TextStyle(
+                color: secondaryFillColor,
+                fontSize: 16,
+                fontFamily: 'RedHatDisplay',
+                fontWeight: FontWeight.w400,
+              ),
+            ),
+            SizedBox(
+              height: 30,
+            ),
+            Row(
+              children: [
+                Text(
+                  "${userPlanController.planBeneficiaryName.value}",
+                  style: TextStyle(
+                    color: secondaryFillColor,
+                    fontSize: 16,
+                    fontFamily: 'RedHatDisplay',
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                Spacer(),
+                Text(
+                  "${userPlanController.planBeneficiaryPrice.value}",
+                  style: TextStyle(
+                    color: secondaryFillColor,
+                    fontSize: 16,
+                    fontFamily: 'RedHatDisplay',
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(
+              height: 20,
+            ),
+            Row(
+              children: [
+                Text(
+                  "Extra Person Price",
+                  style: TextStyle(
+                    color: secondaryFillColor,
+                    fontSize: 16,
+                    fontFamily: 'RedHatDisplay',
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                Spacer(),
+                Text(
+                  "${userPlanController.planBeneficiaryExtraPersonPrice.value}",
+                  style: TextStyle(
+                    color: secondaryFillColor,
+                    fontSize: 16,
+                    fontFamily: 'RedHatDisplay',
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

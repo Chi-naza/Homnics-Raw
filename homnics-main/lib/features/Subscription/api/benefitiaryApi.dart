@@ -1,20 +1,77 @@
-
 import 'dart:convert';
 
-import 'package:homnics/services/base_api.dart';
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:http/http.dart' as http;
 import 'package:http/http.dart';
 
-import 'benefitiary_model.dart';
+import '../../../authentication/controller/authentication_controller.dart';
+import '../../../services/constants.dart';
+import 'create_beneficiary_request_model.dart';
 
-class BenefitiaryApi extends BaseAPI {
-  //var url = '${baseUrl}${loginUrl}';
- Future<bool> addBenefitiary(BenefitiaryRequestModel benefitiaryRequestModel) async{
-   var url = "https://api.homnics.com/user-api/plan/beneficiary";
+class BenefitiaryController {
+  var authenticationController = Get.find<AuthenticationController>();
 
-   final param = json.encode(benefitiaryRequestModel.toJson());
+  Future<void> makePostRequest(
+      CreateBeneficiaryRequestModel createBeneficiaryRequestModel) async {
+    final url = Uri.parse('https://api.homnics.com/user-api/plan/beneficiary');
 
-   final response = await post(Uri.parse(url), headers: await myHeaders(), body: param);
+    try {
+      final response = await http.post(
+        url,
+        headers: await authenticationController.userHeader(),
+        body: json.encode(createBeneficiaryRequestModel.toJson()),
+      );
+      print(response.body);
+      if (response.statusCode == 200) {
+        print('POST request successful!');
 
-    return true;
- }
+        authenticationController.aPiSnackBar("Beneficiary Added!");
+        print('Response: ${response.body}');
+        print('Response Status Code ${response.statusCode}');
+
+        // final route =
+        //     MaterialPageRoute(builder: (context) => BenefitiaryListScreen());
+        // Navigator.push(context, route);
+
+        // You can return the response data if needed, e.g., BeneficiaryResponseModel.fromJson(jsonDecode(response.body));
+      } else {
+        print('POST request failed with status code: ${response.statusCode}');
+      }
+    } catch (error) {
+      print('Error making POST request: $error');
+      // You can throw an exception or handle the error as needed.
+    }
+  }
+
+  // Future<UserPlanHistoryResponseModel> getUserPlansHistory() async {
+  //   var (userId, email, password, token) =
+  //       await authenticationController.fetchUserData();
+
+  //   var url = baseUrl + getUserPlansHistoryUrl(userId);
+  //   try {
+  //     final response = await get(
+  //       Uri.parse(url),
+  //       headers: await {
+  //         'Accept': 'application/vnd.api.v1+json',
+  //         'Content-Type': 'Application/json',
+  //         "Authorization": "Bearer $token",
+  //       },
+  //     );
+  //     print(response.body);
+  //     if (response.statusCode == 200) {
+  //       final Map<String, dynamic> json = jsonDecode(response.body);
+
+  //       var returnedData = UserPlanHistoryResponseModel.fromJson(json);
+  //       print("RETURNED DATA : $returnedData");
+  //       return returnedData;
+  //     } else {
+  //       throw Exception('Empty response: No user data available.');
+  //     }
+  //   } catch (e) {
+  //     // Handle exceptions (e.g., network errors) here.
+  //     print('Error: $e');
+  //     return throw (e);
+  //   }
+  // }
 }

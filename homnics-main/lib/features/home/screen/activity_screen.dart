@@ -10,6 +10,7 @@ import '../../../authentication/controller/authentication_controller.dart';
 import '../../../services/base_api.dart';
 import '../../HealthPlans/controllers/UserPlanController.dart';
 import '../../appointment/widgets/appointment_list_filter.dart';
+import '../../appointment/widgets/ecg_loader.dart';
 
 class ActivityScreen extends StatefulWidget {
   const ActivityScreen({super.key});
@@ -24,8 +25,8 @@ class _ActivityScreenState extends State<ActivityScreen> {
   bool isSwitch = true;
   List latestAppointment = [];
   List latestPrescription = [];
-  bool isLoading = true;
-
+  bool isLoading = false;
+  late Future<dynamic> prescriptionsData;
   String dropdownValue = 'Appointments';
   String selectedOption = 'Appointments';
 
@@ -43,13 +44,13 @@ class _ActivityScreenState extends State<ActivityScreen> {
 
   var userPlanController = Get.find<UsersPlanController>();
   var authenticationController = Get.find<AuthenticationController>();
+  //var prescriptionController = Get.find<PrescriptionController>();
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    print("fetch prescriptions");
-    //PrescriptionController().fetchPrescriptions(context);
+    prescriptionsData = PrescriptionController().fetchPrescriptions();
   }
 
   Widget getAppointmentsWidget() {
@@ -78,38 +79,125 @@ class _ActivityScreenState extends State<ActivityScreen> {
 
   Widget getPrescriptionsWidget() {
     return Container(
-      child: Container(
-        width: double.infinity,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              width: MediaQuery.of(context).size.width,
-              decoration: BoxDecoration(
-                  //color: appBarColor
-                  ),
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text('Today Sat, 23 July'),
-              ),
-            ),
-            Padding(
-                padding:
-                    const EdgeInsets.only(left: 12.0, bottom: 8.0, right: 2),
-                child: Column(
-                  children: [
-                    // isLoading
-                    //     ? Container(
-                    //         alignment: Alignment.center,
-                    //         child: EcgLoadingWidget(),
-                    //       ):
-                    Container(
-                      child: _buildPrescriptionBodySwitch(),
-                    ),
-                  ],
-                )),
-          ],
-        ),
+      color: Colors.black,
+      width: double.infinity,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          FutureBuilder(
+            future: prescriptionsData, // Use the Future variable
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return CircularProgressIndicator(); // Display a loading indicator
+              } else if (snapshot.hasError) {
+                return Text(
+                    "Error: ${snapshot.error}"); // Display an error message
+              } else {
+                // Data is available, you can access it using snapshot.data
+                if (snapshot.data != null) {
+                  List<dynamic> prescriptions =
+                      snapshot.data; // Assuming prescriptions is a list
+
+                  return ListView.builder(
+                    itemCount: 0,
+                    itemBuilder: (context, index) {
+                      var prescription = prescriptions[index];
+
+                      return Padding(
+                        padding: const EdgeInsets.only(top: 16.0),
+                        child: Column(
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.only(right: 8),
+                                  child: InkWell(
+                                    onTap: () {
+                                      setState(() {});
+                                    },
+                                    child: Container(
+                                      height: 32,
+                                      width: 32,
+                                      decoration: BoxDecoration(
+                                        border: Border.all(
+                                          color: greyColor,
+                                          width: 1.0,
+                                        ),
+                                        borderRadius: BorderRadius.circular(16),
+                                        shape: BoxShape.rectangle,
+                                        color: appBarColor,
+                                      ),
+                                      child: Icon(
+                                        Icons.calendar_month_outlined,
+                                        size: 18,
+                                        color: primaryColor,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'instruction',
+                                      textAlign: TextAlign.left,
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontFamily: 'RedHatDisplay',
+                                        fontWeight: FontWeight.w500,
+                                        color: secondaryFillColor,
+                                      ),
+                                    ),
+                                    Text(
+                                      "Format : ${prescription['format']}",
+                                      textAlign: TextAlign.left,
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontFamily: 'RedHatDisplay',
+                                        fontWeight: FontWeight.w500,
+                                        color: secondaryFillColor,
+                                      ),
+                                    ),
+                                    Text(
+                                      'Dr. Ben Odukoya',
+                                      textAlign: TextAlign.left,
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontFamily: 'RedHatDisplay',
+                                        fontWeight: FontWeight.w400,
+                                        color: iconsColor,
+                                      ),
+                                    ),
+                                    Text(
+                                      'dosage',
+                                      textAlign: TextAlign.left,
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontFamily: 'RedHatDisplay',
+                                        fontWeight: FontWeight.w500,
+                                        color: greyColor,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                            Divider(color: greyColor),
+                            SizedBox(height: 10),
+                          ],
+                        ),
+                      );
+                    },
+                  );
+                } else {
+                  return Text(
+                      "Data is null"); // Handle the case where data is null
+                }
+              }
+            },
+          )
+        ],
       ),
     );
   }
@@ -383,135 +471,6 @@ class _ActivityScreenState extends State<ActivityScreen> {
           ),
         ],
       );
-    }
-  }
-
-  _buildPrescriptionBodySwitch() {
-    return Padding(
-      padding: const EdgeInsets.only(top: 16.0),
-      child: Column(
-        children: [
-          ListView.builder(
-              shrinkWrap: true,
-              physics:
-                  NeverScrollableScrollPhysics(), // Disable list view scrolling
-              itemCount: latestPrescription.length, // Set your item count
-              itemBuilder: (context, index) {
-                final latestPrescriptions = latestPrescription[index] as Map;
-                return Column(
-                  children: [
-                    Row(mainAxisAlignment: MainAxisAlignment.start, children: [
-                      Padding(
-                        padding: const EdgeInsets.only(right: 8),
-                        child: InkWell(
-                          onTap: () {
-                            setState(() {});
-                          },
-                          child: Container(
-                            height: 32,
-                            width: 32,
-                            decoration: BoxDecoration(
-                                border: Border.all(
-                                  color: greyColor,
-                                  width: 1.0,
-                                ),
-                                borderRadius: BorderRadius.circular(16),
-                                shape: BoxShape.rectangle,
-                                color: appBarColor),
-                            child: Icon(
-                              Icons.calendar_month_outlined,
-                              size: 18,
-                              color: primaryColor,
-                            ),
-                          ),
-                        ),
-                      ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            latestPrescriptions['instruction'],
-                            textAlign: TextAlign.left,
-                            style: TextStyle(
-                                fontSize: 16,
-                                fontFamily: 'RedHatDisplay',
-                                fontWeight: FontWeight.w500,
-                                color: secondaryFillColor),
-                          ),
-                          Text(
-                            "Format :${latestPrescriptions['format']}",
-                            textAlign: TextAlign.left,
-                            style: TextStyle(
-                                fontSize: 16,
-                                fontFamily: 'RedHatDisplay',
-                                fontWeight: FontWeight.w500,
-                                color: secondaryFillColor),
-                          ),
-                          Text(
-                            'Dr. Ben Odukoya',
-                            textAlign: TextAlign.left,
-                            style: TextStyle(
-                                fontSize: 16,
-                                fontFamily: 'RedHatDisplay',
-                                fontWeight: FontWeight.w400,
-                                color: iconsColor),
-                          ),
-                          Text(
-                            latestPrescriptions['dosage'],
-                            textAlign: TextAlign.left,
-                            style: TextStyle(
-                                fontSize: 14,
-                                fontFamily: 'RedHatDisplay',
-                                fontWeight: FontWeight.w500,
-                                color: greyColor),
-                          ),
-                        ],
-                      ),
-                      SizedBox(
-                        height: 8.0,
-                      ),
-                    ]),
-                    Divider(color: greyColor),
-                    SizedBox(
-                      height: 10,
-                    ),
-                  ],
-                );
-              }),
-        ],
-      ),
-    );
-  }
-
-  fetchPrescriptions() async {
-    try {
-      String beneficiaryId = await userPlanController.getPlanBeneficiarId();
-      final url = baseUrl + getPrescriptionsById(beneficiaryId);
-
-      final response = await get(Uri.parse(url),
-          headers: await authenticationController.userHeader());
-      print(url);
-      print(response);
-      print("beneficiaryId : ${beneficiaryId}");
-      if (response.statusCode == 200) {
-        final responsePrescription = jsonDecode(response.body);
-        final result = responsePrescription['medications'];
-        setState(() {
-          latestPrescription = result;
-        });
-      } else if (response.statusCode == 404) {
-        // Handle 404 status code (Resource not found)
-        print("Prescriptions not found for the beneficiary.");
-        // Display a user-friendly message to indicate no prescriptions found.
-      } else {
-        // Handle other error status codes here
-        print("An error occurred Activity: ${response.statusCode}");
-        // Display a generic error message or implement other appropriate actions.
-      }
-    } catch (e) {
-      // Handle any other exceptions that might occur during the process
-      print("An error occurred with error Pres: $e");
-      // Display a generic error message or implement other appropriate actions.
     }
   }
 }

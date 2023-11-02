@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:homnics/features/auth/screens/account_success_screen.dart';
 import 'package:homnics/features/home/screen/navigation_screen.dart';
 import 'package:homnics/features/professionals/controllers/professionalController.dart';
+import 'package:homnics/features/professionals/models/all_professional_model.dart';
 import 'package:homnics/features/professionals/models/professionals.dart';
 
 import '../../appointment/widgets/ecg_loader.dart';
@@ -17,14 +19,15 @@ class ProfessionalScreen extends StatefulWidget {
 }
 
 class _ProfessionalScreenState extends State<ProfessionalScreen> {
-  List<Professional> professionals = [];
-  String planBeneficiaryId = '';
+  //List<Professional> professionals = [];
+  final TextEditingController searchController = TextEditingController();
+  final ProfessionController professionController = ProfessionController();
+  String searchQuery = '';
   String networkImage =
       'https://ahegel-dump.s3.amazonaws.com/homnics-avatar/default_user.png';
 
   @override
   initState() {
-    getData();
     super.initState();
     _getProfessionals();
   }
@@ -37,19 +40,7 @@ class _ProfessionalScreenState extends State<ProfessionalScreen> {
         //backgroundColor: appBarColor,
         automaticallyImplyLeading: false,
         centerTitle: true,
-        // leading: Padding(
-        //     padding: const EdgeInsets.all(
-        //       8.0,
-        //     ),
-        //     child: GestureDetector(
-        //       onTap: () {
-        //         Navigator.pop(context);
-        //       },
-        //       child: Icon(
-        //         Icons.arrow_back_ios_new,
-        //         //color: iconsColor,
-        //       ),
-        //     )),
+
         title: Align(
           alignment: Alignment.center,
           child: Text(
@@ -83,80 +74,91 @@ class _ProfessionalScreenState extends State<ProfessionalScreen> {
       backgroundColor: Theme.of(context).colorScheme.background,
       //backgroundColor: Colors.white,
       body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Row(
-                  children: [
-                    Flexible(
-                      //flex: 1,
-                      child: SizedBox(
-                        height: 50,
-                        child: TextField(
-                          cursorColor: Colors.grey,
-                          textAlign: TextAlign.left,
-                          decoration: InputDecoration(
-                            fillColor: Colors.white,
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8.0),
+        child: RefreshIndicator(
+          onRefresh: _getProfessionals,
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Row(
+                    children: [
+                      Flexible(
+                        child: SizedBox(
+                          height: 50,
+                          child: TextField(
+                            controller:
+                                searchController, // Use the controller here
+                            cursorColor: Colors.grey,
+                            textAlign: TextAlign.left,
+                            decoration: InputDecoration(
+                              fillColor: Colors.white,
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8.0),
+                              ),
+                              hintText: 'Find Professionals',
+                              hintStyle: TextStyle(
+                                color: Colors.grey,
+                              ),
+                              prefixIcon: Icon(
+                                Icons.search,
+                              ),
                             ),
-                            hintText: 'Search',
-                            hintStyle: TextStyle(
-                              color: Colors.grey,
-                              //fontSize: 16,
-                            ),
-                            prefixIcon: Icon(
-                              Icons.search,
-                            ),
+                            onChanged: (value) {
+                              setState(() {
+                                searchQuery =
+                                    value; // Update searchQuery as text changes
+                              });
+                            },
                           ),
                         ),
                       ),
-                    ),
-                    GestureDetector(
-                      onTap: () {},
-                      child: Container(
-                          margin: EdgeInsets.only(left: 15),
-                          // padding: EdgeInsets.all(15),
-                          decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(15)),
-                          child: Image.asset(
-                            'assets/images/landing/ri_equalizer-line.png',
-                            fit: BoxFit.cover,
-                          ),
-                          width: 25),
-                    ),
-                  ],
-                ),
-              ),
-              FutureBuilder<List<Professional>>(
-                  future: _getProfessionals(),
-                  builder:
-                      (context, AsyncSnapshot<List<Professional>> snapshot) {
-                    if (snapshot.hasData &&
-                        snapshot.connectionState == ConnectionState.done) {
-                      return SingleChildScrollView(
+                      GestureDetector(
+                        onTap: () {
+                          _getProfessionals();
+                        },
                         child: Container(
-                          height: MediaQuery.of(context).size.height,
+                            margin: EdgeInsets.only(left: 15),
+                            // padding: EdgeInsets.all(15),
+                            decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(15)),
+                            child: Image.asset(
+                              'assets/images/landing/ri_equalizer-line.png',
+                              fit: BoxFit.cover,
+                            ),
+                            width: 25),
+                      ),
+                    ],
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Text(
+                    'All Professionals',
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                FutureBuilder<List<Professional>>(
+                    future: _getProfessionals(),
+                    builder:
+                        (context, AsyncSnapshot<List<Professional>> snapshot) {
+                      if (snapshot.hasData &&
+                          snapshot.connectionState == ConnectionState.done) {
+                        return Container(
+                          height: MediaQuery.of(context).size.height / 1.4,
                           child: Column(
                             children: [
-                              Padding(
-                                padding: const EdgeInsets.all(16.0),
-                                child: Text(
-                                  'List of Professionals',
-                                  textAlign: TextAlign.center,
-                                ),
-                              ),
                               Expanded(
                                 child: ListView.builder(
-                                    itemCount: snapshot.data!.length,
+                                    padding: EdgeInsets.only(top: 5),
+                                    itemCount: snapshot.data?.length,
                                     itemBuilder:
                                         (BuildContext context, int index) {
                                       Professional professional =
                                           snapshot.data![index];
                                       return ProfessionalWidget(
+                                          dateSelected: "",
                                           professional: professional);
                                     }),
                               ),
@@ -165,20 +167,32 @@ class _ProfessionalScreenState extends State<ProfessionalScreen> {
                               )
                             ],
                           ),
-                        ),
-                      );
-                    } else {
-                      return Container(
-                        alignment: Alignment.center,
-                        height: MediaQuery.of(context).size.height * 0.7,
-                        //replace this with a loading icon
-                        // child: new CircularProgressIndicator(),
-                        child: EcgLoadingWidget(),
-                      );
-                    }
-                    ;
-                  }),
-            ],
+                        );
+                      } else if (!snapshot.hasData &&
+                          snapshot.connectionState == ConnectionState.done) {
+                        return Container(
+                          alignment: Alignment.center,
+                          height: MediaQuery.of(context).size.height * 0.7,
+                          padding: EdgeInsets.all(21),
+                          //replace this with a loading icon
+                          // child: new CircularProgressIndicator(),
+                          child: Text(
+                            "No professional available on this day, choose another date",
+                            textAlign: TextAlign.center,
+                          ),
+                        );
+                      } else {
+                        return Container(
+                          alignment: Alignment.topCenter,
+                          height: MediaQuery.of(context).size.height * 0.9,
+                          //replace this with a loading icon
+                          // child: new CircularProgressIndicator(),
+                          child: EcgLoadingWidget(),
+                        );
+                      }
+                    }),
+              ],
+            ),
           ),
         ),
       ),
@@ -186,19 +200,16 @@ class _ProfessionalScreenState extends State<ProfessionalScreen> {
   }
 
   Future<List<Professional>> _getProfessionals() async {
-    print("here");
+    print(widget);
     List<Professional> professionals = await ProfessionController()
-        .getProfessionals(pageNumber: 1, pageSize: 10, searchParam: "");
-    print("Hello");
+        .apiGetAllProfessionalCall(
+            pageNumber: 1, pageSize: 1000, searchParam: searchQuery);
+
     return professionals;
   }
 
   deleteThisFunction() {
     Navigator.of(context)
         .push(MaterialPageRoute(builder: (_) => AccountSuccessScreen()));
-  }
-
-  void getData() {
-    // planBeneficiaryId = await UserPlanController().getPlanBeneficiarId(context);
   }
 }

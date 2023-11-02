@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:get/get.dart';
 import 'package:homnics/common/utils/colors.dart';
 import 'package:homnics/features/home/screen/account_screen.dart';
 import 'package:homnics/features/home/screen/activity_screen.dart';
@@ -9,6 +10,7 @@ import 'package:homnics/features/home/screen/home_screen.dart';
 import 'package:homnics/features/professionals/views/index.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../authentication/controller/authentication_controller.dart';
 import '../../HealthPlans/models/health_plan_model.dart';
 import '../../auth/controllers/auth_api.dart';
 import '../../auth/models/user.dart';
@@ -55,6 +57,7 @@ class _NavigationScreenState extends State<NavigationScreen> {
   void initState() {
     getuser();
     super.initState();
+    authenticationController.getCurrentLoggedInUser();
     screens = [
       HomeScreen(
         healthPlan: healthPlan,
@@ -74,10 +77,14 @@ class _NavigationScreenState extends State<NavigationScreen> {
     networkImage = _pref.getString("avatar") ?? networkImage;
   }
 
+  var authenticationController = Get.find<AuthenticationController>();
+
   @override
   Widget build(
     BuildContext context,
   ) {
+    var user = authenticationController.userInfo;
+
     final items = <BottomNavigationBarItem>[
       BottomNavigationBarItem(
         backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
@@ -119,7 +126,7 @@ class _NavigationScreenState extends State<NavigationScreen> {
         backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
         //backgroundColor: appBarColor,
         icon: CachedNetworkImage(
-          imageUrl: userData?.avatar ?? networkImage!,
+          imageUrl: user.value.avatar ?? networkImage!,
           placeholder: (context, url) => const CircleAvatar(
             backgroundColor: Colors.grey,
             radius: 14,

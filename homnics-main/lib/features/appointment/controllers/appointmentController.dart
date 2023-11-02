@@ -45,11 +45,11 @@ class AppointmentController extends BaseAPI {
           headers: await authenticationController.userHeader());
       //print(response.statusCode);
 
-      print(response.statusCode);
+      print("Activity fetch status code : ${response.statusCode}");
       var result = json.decode(response.body);
 
       if (response.statusCode == 200) {
-        print(result['appointments']);
+        // print(result['appointments']);
         return result['appointments'];
         //return Appointment.appointmentsFromJson(result['appointments']);
       }
@@ -108,12 +108,14 @@ class AppointmentController extends BaseAPI {
           await userPlanController.getPlanBeneficiarId(),
         );
 
-    var response = await get(Uri.parse(url), headers: await myHeaders());
+    var response = await get(Uri.parse(url),
+        headers: await authenticationController.userHeader());
     var result = json.decode(response.body);
     if (response.statusCode < 400) {
       print(result['appointments']);
+      print(Appointment.appointmentsFromJson(result['appointments']));
+
       return result['appointments'];
-      return Appointment.appointmentsFromJson(result['appointments']);
     }
     return [];
   }

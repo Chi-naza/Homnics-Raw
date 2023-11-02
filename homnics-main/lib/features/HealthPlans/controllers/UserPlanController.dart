@@ -18,9 +18,16 @@ class UsersPlanController extends GetxController {
   final userPlanName = ''.obs;
   final planStartDate = ''.obs;
   final planId = ''.obs;
+  final planEndDate = ''.obs;
+  final planPaymentStatus = ''.obs;
+  final planBeneficiaryMembers = ''.obs;
+  final planDescription = ''.obs;
+  final planBeneficiaryName = ''.obs;
+  final planBeneficiaryPrice = ''.obs;
+  final planBeneficiaryExtraPersonPrice = ''.obs;
 
   // Base
-  BaseAPI base = BaseAPI();
+  // BaseAPI base = BaseAPI();
 
   // auth controller
   var auth = Get.find<AuthenticationController>();
@@ -45,7 +52,7 @@ class UsersPlanController extends GetxController {
       'paymentReference': ref,
     });
     final response = await post(Uri.parse(url),
-        headers: await base.myHeaders(), body: params);
+        headers: await auth.userHeader(), body: params);
 
     // print(json.decode(response.body));
     if (response.statusCode == 200) {
@@ -87,8 +94,6 @@ class UsersPlanController extends GetxController {
   // }
 
   Future<String> getPlanBeneficiarId() async {
-    SharedPreferences _pref = await SharedPreferences.getInstance();
-    planId.value = (await _pref.getString("health_plan_id"))!;
     var url = baseUrl + userPlanBeneficiaryUrl(planId.value);
 
     final response =
@@ -98,6 +103,7 @@ class UsersPlanController extends GetxController {
     if (response.statusCode == 200) {
       return result['planBeneficiaries'][0]['id'];
     } else {
+      print(result['planBeneficiaries']);
       throw Exception('Failed to load data!');
     }
   }
@@ -106,11 +112,17 @@ class UsersPlanController extends GetxController {
     CurrentLoggedInUserModel user = auth.userInfo.value;
     print("Active user Id :${user.userId}");
 
+    SharedPreferences _pref = await SharedPreferences.getInstance();
+    var token = await _pref.getString("user_token") ?? '';
+
     var url = baseUrl + getActivePlanUrl(user.userId);
-    var response = await get(Uri.parse(url), headers: await base.myHeaders());
+    var response = await get(Uri.parse(url), headers: {
+      'Accept': 'application/vnd.api.v1+json',
+      'Content-Type': 'application/json',
+      "Authorization": "Bearer $token",
+    });
     var result = json.decode(response.body);
 
-    SharedPreferences _pref = await SharedPreferences.getInstance();
     await _pref.setString(
         "user_plan_strt_date", result['userPlans'][0]['startDate']);
     await _pref.setString(
@@ -157,10 +169,23 @@ class UsersPlanController extends GetxController {
         userPlanName.value = returnResponse.userPlans.first.plan.name;
         planStartDate.value = returnResponse.userPlans.first.startDate;
         planId.value = returnResponse.userPlans.first.planId;
+        planEndDate.value = returnResponse.userPlans.first.endDate;
+        planPaymentStatus.value = returnResponse.userPlans.first.paymentStatus;
+        planDescription.value = returnResponse.userPlans.first.plan.description;
+        planBeneficiaryName.value = returnResponse.userPlans.first.plan.name;
+        planBeneficiaryPrice.value =
+            returnResponse.userPlans.first.plan.price.toString();
+        planBeneficiaryExtraPersonPrice.value =
+            returnResponse.userPlans.first.plan.extraPersonPrice.toString();
+
+        planBeneficiaryMembers.value =
+            returnResponse.userPlans.first.plan.maxPerson.toString();
         // Save to local
         await _pref.setString("health_plan_name", userPlanName.value);
         await _pref.setString("health_plan_id", planId.value);
+        await _pref.setString("health_plan_strt_date", planStartDate.value);
         // Testing print outs
+
         print(userPlanName);
         print(planStartDate);
         print(planId);

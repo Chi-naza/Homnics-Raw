@@ -12,6 +12,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../authentication/controller/authentication_controller.dart';
 import '../../HealthPlans/controllers/UserPlanController.dart';
 import '../../HealthPlans/models/health_plan_model.dart';
+import '../../HealthPlans/models/user_plan_active.dart';
 import '../../auth/controllers/auth_api.dart';
 
 class AccountScreen extends StatefulWidget {
@@ -24,9 +25,10 @@ class AccountScreen extends StatefulWidget {
 }
 
 class _AccountScreenState extends State<AccountScreen> {
-  var auth = Get.find<AuthAPI>();
+  //var auth = Get.find<AuthAPI>();
   var authenticationController = Get.find<AuthenticationController>();
   var userPlanController = Get.find<UsersPlanController>();
+  UserplansActivePayload? userplansActivePayload;
   // String? currentPlan;
   // User user = User(
   //   id: '',
@@ -51,19 +53,29 @@ class _AccountScreenState extends State<AccountScreen> {
   // String? startDate;
   String? networkImage;
   final currentPlan = "".obs;
+  final planStartDate = "".obs;
 
   @override
   void initState() {
     // getuser();
     super.initState();
     authenticationController.getCurrentLoggedInUser();
-    // userDetails();
+    getuserPlan();
     //getHealthPlans();
   }
 
   Future<void> getuserPlan() async {
+    final UserplansActivePayload? response =
+        await userPlanController.getCurrentUserPlan();
+
+    if (response != null) {
+      setState(() {
+        userplansActivePayload = response;
+      });
+    }
     SharedPreferences _pref = await SharedPreferences.getInstance();
     currentPlan.value = (await _pref.getString("health_plan_name"))!;
+    planStartDate.value = (await _pref.getString("user_plan_strt_date"))!;
 
     print("CURRENT PLAN : $currentPlan");
   }
@@ -71,6 +83,7 @@ class _AccountScreenState extends State<AccountScreen> {
   @override
   Widget build(BuildContext context) {
     var user = authenticationController.userInfo;
+    print(planStartDate);
     return Scaffold(
         appBar: AppBar(
           elevation: 0,
@@ -144,8 +157,7 @@ class _AccountScreenState extends State<AccountScreen> {
                                 height: 100,
                                 width: 100,
                                 child: CachedNetworkImage(
-                                  imageUrl: networkImage ??
-                                      'https://homnics-dump.s3.amazonaws.com/homnics-avatar/no_face.jpg',
+                                  imageUrl: user.value.avatar,
                                   placeholder: (context, url) =>
                                       const CircleAvatar(
                                     backgroundColor: Colors.grey,
@@ -204,32 +216,35 @@ class _AccountScreenState extends State<AccountScreen> {
                                     height: 5.0,
                                   ),
                                   SizedBox(
-                                    child: Text(
-                                      "${currentPlan}", //"${currentPlan ?? "Freemium"}",
-                                      textAlign: TextAlign.left,
-                                      style: TextStyle(
-                                          fontSize: 20,
-                                          fontFamily: 'RedHatDisplay',
-                                          fontWeight: FontWeight.w400,
-                                          color: iconsColor),
-                                    ),
+                                    child: Obx(() {
+                                      return Text(
+                                        "${userPlanController.userPlanName.value}", //"${currentPlan ?? "Freemium"}",
+                                        textAlign: TextAlign.left,
+                                        style: TextStyle(
+                                            fontSize: 20,
+                                            fontFamily: 'RedHatDisplay',
+                                            fontWeight: FontWeight.w400,
+                                            color: iconsColor),
+                                      );
+                                    }),
                                   ),
                                   Padding(
                                     padding: const EdgeInsets.all(4.0),
                                     child: SizedBox(
-                                      child: Text(
-                                        _formatDate(userPlanController
-                                            .planStartDate
-                                            .value), //_formatDate("${startDate ?? ''}"),
-                                        //DateFormat('EEE, d MMM y').format(DateTime.parse("${startDate ?? "Started Date"}")),
-                                        // '${startDate ?? "Started Date"}',
-                                        textAlign: TextAlign.left,
-                                        style: TextStyle(
-                                            fontSize: 13,
-                                            fontFamily: 'RedHatDisplay',
-                                            fontWeight: FontWeight.w400,
-                                            color: iconsColor),
-                                      ),
+                                      child: Obx(() {
+                                        return Text(
+                                          _formatDate(
+                                              "${userPlanController.planEndDate.value}"),
+
+                                          //Started
+                                          textAlign: TextAlign.left,
+                                          style: TextStyle(
+                                              fontSize: 13,
+                                              fontFamily: 'RedHatDisplay',
+                                              fontWeight: FontWeight.w400,
+                                              color: iconsColor),
+                                        );
+                                      }),
                                     ),
                                   ),
                                 ],

@@ -12,10 +12,12 @@ class FiltteredAppointmentsHome extends StatelessWidget {
       appBar: AppBar(
         title: Text("Upcoming Appointments"),
       ),
-      body: Container(
-        height: MediaQuery.of(context).size.height,
-        child: AppointmentListFilter(
-          status: 2,
+      body: SingleChildScrollView(
+        child: Container(
+          height: MediaQuery.of(context).size.height,
+          child: AppointmentListFilter(
+            status: 2,
+          ),
         ),
       ),
     );

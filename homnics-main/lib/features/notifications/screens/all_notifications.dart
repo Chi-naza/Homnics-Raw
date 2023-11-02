@@ -7,6 +7,7 @@ import 'package:homnics/features/notifications/screens/tips_screen.dart';
 import 'package:http/http.dart';
 import 'package:intl/intl.dart';
 
+import '../../../authentication/controller/authentication_controller.dart';
 import '../../../services/base_api.dart';
 import '../../../services/constants.dart';
 import '../../auth/models/user.dart';
@@ -21,10 +22,11 @@ class DisplayNotificationsScreen extends StatefulWidget {
 
 class _DisplayNotificationsScreenState
     extends State<DisplayNotificationsScreen> {
-  var authController = Get.find<AuthAPI>();
+  // var authController = Get.find<AuthAPI>();
+  var authController = Get.find<AuthenticationController>();
+
   List latestNotifications = [];
-  Color _container1Color = Colors.transparent;
-  Color _container2Color = Colors.transparent;
+
   @override
   void initState() {
     // TODO: implement initState
@@ -63,11 +65,6 @@ class _DisplayNotificationsScreenState
                   children: [
                     Card(
                       child: ListTile(
-                          // leading: CircleAvatar(
-                          //   child: Text("${index + 1}"),
-                          //   backgroundColor: appBarColor,
-                          // ),
-                          //Icon(Icons.star),
                           title: Text(
                             "${notifications['subject']}",
                             maxLines: 2, // Limit to a single line
@@ -94,17 +91,7 @@ class _DisplayNotificationsScreenState
                                   'NotificationType: ${notifications['notificationType']}')
                             ],
                           ),
-                          onTap: () async {
-                            // Meeting? meeting = await notificationsController()
-                            //     .fixMeeting(notifications['id']);
-                            // String url = meeting?.meetingLink ?? '';
-                            // if (url.isNotEmpty) {
-                            //   Navigator.of(context).push(MaterialPageRoute(
-                            //       builder: (_) => MeetingPoint(meeting: meeting!)
-                            //       )
-                            //       );
-                            // }
-                          }),
+                          onTap: () async {}),
                     ),
                   ],
                 );
@@ -113,21 +100,29 @@ class _DisplayNotificationsScreenState
   }
 
   Future<void> getNotificationsById() async {
-    User user = authController.userInfo.value;
-    String userId = user.id;
+    var user = authController.userInfo.value;
+    String userId = user.userId;
     var url = baseUrl + getNotifications(userId);
     try {
       var response =
-          await get(Uri.parse(url), headers: await BaseAPI().myHeaders());
+          await get(Uri.parse(url), headers: await authController.userHeader());
 
       if (response.statusCode == 200) {
-        final responseNotifiaction = jsonDecode(response.body) as Map;
-        final result = responseNotifiaction['notifications'] as List;
+        final responseNotification = jsonDecode(response.body) as Map;
+        final result = responseNotification['notifications'] as List;
+
+        print(result);
+        // Sort the notifications by date in descending order
+
+        latestNotifications
+            .sort((a, b) => b.dateCreated.compareTo(a.dateCreated));
+
         setState(() {
           latestNotifications = result;
         });
-        // return notificationResponse;
-      } else {}
+      } else {
+        // Handle the case when the response status code is not 200
+      }
     } catch (error) {
       throw Exception(error);
     }

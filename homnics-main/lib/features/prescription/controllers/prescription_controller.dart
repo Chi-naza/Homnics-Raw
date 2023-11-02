@@ -36,7 +36,7 @@ class PrescriptionController extends BaseAPI {
     }
   }
 
-  Future<Prescription?> fetchPrescriptions(BuildContext context) async {
+  Future<dynamic> fetchPrescriptions() async {
     try {
       String beneficiaryId = await userPlanController.getPlanBeneficiarId();
       final url = baseUrl + getPrescriptionsById(beneficiaryId);
@@ -45,36 +45,16 @@ class PrescriptionController extends BaseAPI {
           headers: await authenticationController.userHeader());
 
       if (response.statusCode == 200) {
-        // Successful response
         print("Prescriptions fetched successfully.");
-        final responsePrescription =
-            jsonDecode(response.body) as Map<String, dynamic>;
-        final prescription = Prescription(
-          id: responsePrescription['id'],
-          beneficiaryName: responsePrescription['beneficiaryName'],
-          professionalName: responsePrescription['professionalName'],
-          medications: (responsePrescription['medications'] as List)
-              .map((medicationJson) => Medication(
-                    medicationId: medicationJson['medicationId'],
-                    dosage: medicationJson['dosage'],
-                    format: medicationJson['format'],
-                    instruction: medicationJson['instruction'],
-                  ))
-              .toList(),
-        );
-      } else if (response.statusCode == 404) {
-        // Handle 404 status code (Resource not found)
-        print("Prescriptions not found for the beneficiary.");
-        // Display a user-friendly message to indicate no prescriptions found.
+
+        var returnedData = jsonDecode(response.body);
+        print(returnedData);
+        return returnedData;
       } else {
-        // Handle other error status codes here
         print("An error occurred: ${response.statusCode}");
-        // Display a generic error message or implement other appropriate actions.
       }
     } catch (e) {
-      // Handle any other exceptions that might occur during the process
       print("An error occurred with error: $e");
-      // Display a generic error message or implement other appropriate actions.
     }
     return null;
   }

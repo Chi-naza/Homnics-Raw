@@ -14,6 +14,7 @@ import '../../../common/utils/scale_size.dart';
 import '../../../common/widgets/health_tips_widget.dart';
 import '../../HealthPlans/controllers/healthplan_api.dart';
 import '../../HealthPlans/models/health_plan_model.dart';
+import '../../HealthPlans/models/user_plan_active.dart';
 import '../../appointment/screens/booking_calender.dart';
 
 import '../../appointment/screens/filtered_appointment_home.dart';
@@ -33,30 +34,11 @@ class _HomeScreenState extends State<HomeScreen> {
   // var auth = Get.find<AuthAPI>();
   var authenticationController = Get.find<AuthenticationController>();
   var userPlanController = Get.put(UsersPlanController());
+  UserplansActivePayload? userplansActivePayload;
   // var userPlanController = Get.find<UsersPlanController>();
 
   var orientation, size, height, width;
 
-  // late User user;
-
-  // User user = User(
-  //   id: '',
-  //   email: '',
-  //   phone: '',
-  //   password: '',
-  //   firstName: '',
-  //   lastName: '',
-  //   address: '',
-  //   emergencyContactName: '',
-  //   emergencyContactPhone: '',
-  //   city: '',
-  //   state: '',
-  //   country: '',
-  //   postalCode: '',
-  //   gender: '',
-  //   emergencyContactRelationship: '',
-  //   dateOfBirth: '',
-  // );
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   GlobalKey<AppointmentListFilterState> appointmentListFilterKey =
       GlobalKey<AppointmentListFilterState>();
@@ -68,15 +50,31 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     authenticationController.getCurrentLoggedInUser();
+    userPlanController.getCurrentUserPlan();
     super.initState();
-    getuserPlan();
+    //getuserPlan();
+    apiCallGetPlan();
+  }
+
+  Future<void> apiCallGetPlan() async {
+    final UserplansActivePayload? response =
+        await userPlanController.getCurrentUserPlan();
+
+    if (response != null) {
+      setState(() {
+        userplansActivePayload = response;
+      });
+    }
   }
 
   HealthPlanApi healthPlanApi = HealthPlanApi();
   @override
   Widget build(BuildContext context) {
     var user = authenticationController.userInfo;
-    print('USER- ${user.value.firstName}');
+    var userId = authenticationController.currentUserId;
+    print('USER Id- ${userId.value}');
+    print(
+        "THE USER PLAN I GOT : ${userplansActivePayload?.userPlans.first.plan.name}");
 
     size = MediaQuery.of(context).size;
     height = size.height;
@@ -102,7 +100,7 @@ class _HomeScreenState extends State<HomeScreen> {
           alignment: Alignment.centerLeft,
           child: Obx(() {
             return Text(
-              "Homnnnics - ${currentPlan ?? userPlanController.userPlanName.value}",
+              "Homnnnics - ${userPlanController.userPlanName.value}",
               style: TextStyle(
                 //color: textColor,
                 fontSize: 16,
@@ -523,38 +521,10 @@ class _HomeScreenState extends State<HomeScreen> {
                         decoration: BoxDecoration(),
                         child: Padding(
                           padding: const EdgeInsets.only(bottom: 10.0),
-                          child: Container(
-                            child: Column(
-                              children: [
-                                Center(
-                                  child: Container(
-                                    height: 200,
-                                    width: 200,
-                                    child: Image.network(
-                                        'https://img.freepik.com/premium-vector/important-information-from-doctor-2d-vector-isolated-illustration_151150-10360.jpg?w=740'),
-                                  ),
-                                ),
-                                SizedBox(
-                                  height: 10,
-                                ),
-                                Center(
-                                  child: Text(
-                                    "No Appointments Here",
-                                    style: TextStyle(
-                                      color: greyColor,
-                                      fontSize: 16,
-                                      fontFamily: 'RedHatDisplay',
-                                      fontWeight: FontWeight.w400,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
+                          child: AppointmentListFilter(
+                            key: appointmentListFilterKey,
+                            status: 2,
                           ),
-                          //   AppointmentListFilter(
-                          //     key: appointmentListFilterKey,
-                          //     status: 2,
-                          //   ),
                         )),
                   ),
                 ),
@@ -569,13 +539,13 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Future<void> getuserPlan() async {
-    SharedPreferences _pref = await SharedPreferences.getInstance();
-    currentPlan.value = (await _pref.getString("health_plan_name"))!;
-    currentPlanId.value = (await _pref.getString("health_plan_id"))!;
-    print("CURRENT PLAN : $currentPlan");
-    print("CURRENT PLAN ID: $currentPlanId");
-  }
+  // Future<void> getuserPlan() async {
+  //   SharedPreferences _pref = await SharedPreferences.getInstance();
+  //   currentPlan.value = (await _pref.getString("health_plan_name"))!;
+  //   currentPlanId.value = (await _pref.getString("health_plan_id"))!;
+  //   print("CURRENT PLAN : $currentPlan");
+  //   print("CURRENT PLAN ID: $currentPlanId");
+  // }
 
   emergencyCall() async {
     var url = Uri.parse("tel:08032744652");
